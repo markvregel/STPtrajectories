@@ -1,0 +1,15 @@
+Package: STPtrajectories
+Type: Package
+Title: Space-time prism trajectories
+Version: 0.1.0
+Author: Mark ten Vregelaar
+Maintainer: Mark ten Vregelaar <m.vregelaar@gmail.com>
+Description: INCOMPLETE. Package for handling Space-Time Prism(STP) trajectories.
+ It contains functions to calculate Potential Path Areas(PPAs), create random
+ trajectories and to test for possible encounters by applying the alibi query.
+ It also provides functions to visulize the STPs treajectories in 3D.
+Depends: trajectories, rgdal
+Suggests: spacetime
+License: MIT
+LazyData: TRUE
+RoxygenNote: 6.0.1
