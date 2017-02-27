@@ -112,6 +112,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL){
 #' @importFrom rgl rgl.bbox axes3d
 #' @author Mark ten Vregelaar
 #' @export
+#'
 axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5){
   tdif<-as.numeric(difftime(minmaxT[2],minmaxT[1],units = 'mins'))
   tickval<-seq(0,tdif*z_factor,length.out = n_ticks_z)
