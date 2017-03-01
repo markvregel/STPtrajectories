@@ -1,21 +1,20 @@
+ggplot2 <img src="logo.png" align="right" />
+
 Overview
 --------
 
-ggplot2 is a system for declaratively creating graphics, based on [The Grammar of Graphics](http://amzn.to/2ef1eWp). You provide the data, tell ggplot2 how to map variables to aesthetics, what graphical primitives to use, and it takes care of the details.
-
+PACKAGE IS INCOMPLETE AND CONTAINS ERRORS. Package for handling Space-Time Prism(STP) trajectories.
+ It contains functions to calculate Potential Path Areas(PPAs), create random
+ trajectories and to test for possible encounters by applying the alibi query.
+ It also provides functions to visulize the STPs treajectories in 3D.
 Installation
 ------------
 
 ``` r
-# The easiest way to get ggplot2 is to install the whole tidyverse:
-install.packages("tidyverse")
 
-# Alternatively, install just ggplot2:
-install.packages("ggplot2")
-
-# Or the the development version from GitHub:
+# the the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("tidyverse/ggplot2")
+devtools::install_github("markvregel/STPtrajectories")
 ```
 
 Usage
