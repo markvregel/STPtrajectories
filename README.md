@@ -1,4 +1,4 @@
-ggplot2 <img src="logo.png" align="right" />
+<img src="logo.png" align="right" width="50%" height="50%"/>
 
 Overview
 --------
@@ -20,37 +20,54 @@ devtools::install_github("markvregel/STPtrajectories")
 Usage
 -----
 
-It's hard to succinctly describe how ggplot2 works because it embodies a deep philosophy of visualisation. However, in most cases you start with `ggplot()`, supply a dataset and aesthetic mapping (with `aes()`). You then add on layers (like `geom_point()` or `geom_histogram()`), scales (like `scale_colour_brewer()`), faceting specifications (like `facet_wrap()`) and coordinate systems (like `coord_flip()`).
 
 ``` r
-library(ggplot2)
+library(spacetime)
+library(sp)
+#--------------------------create a STP_Track--------------------------
+## create trajectory data
+t1 <- as.POSIXct(strptime("01/01/2017 12:00:00", "%m/%d/%Y %H:%M:%S"))
+t2 <- as.POSIXct(strptime("01/7/2017 12:00:00", "%m/%d/%Y %H:%M:%S"))
+time <- seq(t1,t2,2*60*60)
+n <- length(time)
+x = cumsum(runif(n) * 8000)
+y = smooth(cumsum(runif(n,-0.7,1) * 16000))
 
-ggplot(mpg, aes(displ, hwy, colour = class)) + 
-  geom_point()
+crs_NL = CRS("+init=epsg:28992")
+
+points <- SpatialPoints(cbind(x,y),crs_NL)
+
+temp <-18 + cumsum(runif(n,-0.3,0.25))
+altitude <- 200 + cumsum(runif(n,-0.75,1)*50)
+
+data <- data.frame(temperature = temp, elevation = altitude)
+## create a STP_track
+# create class STIDF
+stidf1 = STIDF(points, time, data)
+
+# Track-class {trajectories}
+my_track1<-Track(stidf1)
+
+# set maximum speed
+v1<-10/3.6# speed 10 km/h = 2.777778 m/s
+
+# STP_track class
+STP_track1<-STP_Track(my_track1,v1)
+# plot
+plot(STP_track1,type='p',pch=19,cex=0.8)
+# calculate PPA and add to plot
+PPA<-calculate_PPA(STP_track1)
+plot(PPA,add=TRUE)
 ```
 
-![](README-example-1.png)
+[Also take look at package trajectories](https://github.com/edzer/trajectories)
 
-As well as the components built-in to ggplot2, there are many packages that provide extensions. See a comphrensive list at <https://www.ggplot2-exts.org>.
-
-Learning ggplot2
+Learning to use STPtrajectories
 ----------------
-
-If you are new to ggplot2 you are better off starting with a systematic introduction, rather than trying to learn from reading individual documentation pages. Currently, there are three good places to start:
-
-1.  The [data visualisation](http://r4ds.had.co.nz/data-visualisation.html) and [graphics for communication](http://r4ds.had.co.nz/graphics-for-communication.html) chapters in [R for data science](http://r4ds.had.co.nz). R for data science is designed to give you a comprehensive introduction to the [tidyverse](http://tidyverse.org), and these two chapters will you get up to speed with the essentials of ggplot2 as quickly as possible.
-
-2.  If you'd like to take an interactive online course, try [Data visualisation with ggplot2](https://www.datacamp.com/courses/data-visualization-with-ggplot2-1) by Rick Scavetta on datacamp.
-
-3.  If you want to dive into making common graphics as quickly as possible, I recommend [The R Graphics Cookbook](http://amzn.to/2dVfMfn) by Winston Chang. It provides a set of recipes to solve common graphics problems. A 2nd edition is due out in 2017.
-
-If you've mastered the basics and want to learn more, read [ggplot2: Elegant Graphics for Data Analysis](http://amzn.to/2fncG50). It describes the theoretical underpinnings of ggplot2 and shows you how all the pieces fit together. This book helps you understand the theory that underpins ggplot2, and will help you create new types of graphic specifically tailored to your needs. The book is not available for free, but you can find the complete source for the book at <https://github.com/hadley/ggplot2-book>.
 
 Getting help
 ------------
+1. Check function help
+2. Search in the manual: STPtrajectories.pdf
+3. Read the vignettes
 
-There are two main places to get help with ggplot2:
-
-1.  The [ggplot2 mailing list](https://groups.google.com/forum/?fromgroups#!forum/ggplot2) is a friendly place to ask any questions about ggplot2. You must be a member to post messages, but anyone can read the archived discussions.
-
-2.  [stackoverflow](so) is a great source of answers to common ggplot2 questions. It is also a great place to get help, once you have created a reproducible example that illustrates your problem.
