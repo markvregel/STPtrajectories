@@ -1,10 +1,7 @@
 ## Functions for calculating the Potetial Path Area
-
 #' @title calculate_PPA
 #' @description Function for calculating the Potetial Path Area(PPA) of a STP_track.
-#' The function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
-#'
-#'
+#' This function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
 #' @param STP_track The STP_track for which the PPA needs to be calculated
 #' @param time Time("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
 #' Use time = c(time1,time2) to calculate PPA for a time range. Default is NULL: calculate PPA for entire STP_track
@@ -20,16 +17,22 @@
 #' Only used where paramter time_interval is relavant
 #' @return The Potential Path Area as SpatialPolygons
 #' @author Mark ten Vregelaar
+#' @importMethodsFrom raster bind
+#' @importFrom rgeos gBuffer gIntersection gUnaryUnion
+#' @importFrom rgeos gBuffer gIntersection gUnaryUnion
+#' @import plyr rgdal
 #' @export
 #' @examples
-#' require(spacetime)
-#' ## create a STP_track
+#'library(spacetime)
+#'library(sp)
+#'#--------------------------create a STP_Track--------------------------
+#'# set time
 #'t1 <- strptime("01/01/2017 00:00:00", "%m/%d/%Y %H:%M:%S")
 #'t2 <- t1+5*60*60
 #'time<-seq(t1,t2,30*60)
-#'
+#'# set coordinates
 #'x=c(seq(0,25,5),seq(27.5,37.5,2.5))
-#'y=sample(-2:2, 11,replace = T)
+#'y=sample(-2:2, 11,replace = TRUE)
 #'
 #'n = length(x)
 #'crs_NL = CRS("+init=epsg:28992")
@@ -45,22 +48,23 @@
 #'
 #'# STP_track class
 #'STP_track1<-STP_Track(my_track1,v1)
-#'
+#'#------------------------------example 1------------------------------
 #'## PPA entire track
 #'#calculate PPA
 #'PPA<-calculate_PPA(STP_track1)
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=T)
-#'
+#'plot(PPA,add=TRUE)
+#'#------------------------------example 2------------------------------
 #'## PPA only using every second point
 #'# calculate PPA
 #'PPA<-calculate_PPA(STP_track1,points = seq(1,11,2))
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=T)
+#'plot(PPA,add=TRUE)
+#'#------------------------------example 3------------------------------
 #'## PPA of a specfic moment in time
 #'# calculate PPA
 #'time <- strptime("01/01/2017 01:15:00", "%m/%d/%Y %H:%M:%S")
@@ -68,8 +72,8 @@
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=T)
-#'
+#'plot(PPA,add=TRUE)
+#'#------------------------------example 4------------------------------
 #'## PPA for a time range
 #'# calculate PPA
 #'timerange1 <- c(t1,strptime("01/01/2017 02:15:00", "%m/%d/%Y %H:%M:%S"))
@@ -77,8 +81,7 @@
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=T)
-#'
+#'plot(PPA,add=TRUE)
 calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250, time_interval= 1, quadsegs=12){
   if (!is.null(points)){
     STP_track <-STP_track[points,'']
@@ -93,15 +96,16 @@ calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250, time
 
 }
 
-#' @title calc_PPA
-#' @description This function calcualtes the Potential Path Area(PPA) for a given moment in time.
-#' @param STP A STP_Track
-#' @param time Time("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
-#' @param points The points used for the PPA calculation given as a vector of integers.
-#' Default are the space-time points are directlty before and after space-time point
-#' @return The Potential Path Area as SpatialPolygons for the provided time
-#' @author Mark ten Vregelaar
-#' @importFrom rgeos gBuffer gIntersection gUnaryUnion
+# @title calc_PPA
+# @description This function calcualtes the Potential Path Area(PPA) for a given moment in time.
+# @param STP A STP_Track
+# @param time Time("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
+# @param points The points used for the PPA calculation given as a vector of integers.
+# Default are the space-time points are directlty before and after space-time point
+# @return The Potential Path Area as SpatialPolygons for the provided time
+# @author Mark ten Vregelaar
+# @importFrom rgeos gBuffer gIntersection gUnaryUnion
+#
 calc_PPA <- function(STP,t,points=NULL,qs=12){
 
 
@@ -168,14 +172,14 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   return(PPA)
 }
 
-#' @title calcPPA_STP
-#' @description This function calcualtes the Potential Path Area(PPA) of Space-Time Prism(STP).
-#' A STP is a set of space-time points with a maximum speed
-#' @param STP A STP_Track
-#' @param x_density The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
-#' @return The Potential Path Area of the STP as SpatialPolygons
-#' @author Mark ten Vregelaar
-#'
+# @title calcPPA_STP
+# @description This function calcualtes the Potential Path Area(PPA) of Space-Time Prism(STP).
+# A STP is a set of space-time points with a maximum speed
+# @param STP A STP_Track
+# @param x_density The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
+# @return The Potential Path Area of the STP as SpatialPolygons
+# @author Mark ten Vregelaar
+#
 calcPPA_STP <- function(STP,x_density=250){
   # get coordiantes of STP
   x1<-STP@sp@coords[1,1]
@@ -198,9 +202,8 @@ calcPPA_STP <- function(STP,x_density=250){
   v<-STP@connections$vmax
   # total distance that can be covered
   s=v*t
-  # caluclate the max travel distance using the time that is left after reaching the other point
-  timeLeft <- t-STP@connections$distance/v
-  dist<- timeLeft*v
+  # distance that can still be covered after reaching the other point
+  dist <- s-STP@connections$distance
 
   # caclulate values for the x coordinate usingthe remaining distance
   if(x1<x2){
@@ -244,13 +247,13 @@ calcPPA_STP <- function(STP,x_density=250){
   PPApoly <- SpatialPolygons(list(Poly),proj4string = STP@sp@proj4string)
   return(PPApoly)
 }
-#' @title calcPPA_STP_Track
-#' @description This function calcualtes the Potential Path Area(PPA) of an entire STP_track
-#' @param STP_track The STP_Track for which the PPA will be calculated
-#' @param x_density The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
-#' @return The Potential Path Area of the STP as SpatialPolygons
-#' @author Mark ten Vregelaar
-#' @importMethodsFrom raster bind
+# @title calcPPA_STP_Track
+# @description This function calcualtes the Potential Path Area(PPA) of an entire STP_track
+# @param STP_track The STP_Track for which the PPA will be calculated
+# @param x_density The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
+# @return The Potential Path Area of the STP as SpatialPolygons
+# @author Mark ten Vregelaar
+# @importMethodsFrom raster bind
 calcPPA_STP_Track <- function(STP_track,x_density=250){
   if (length(STP_track)==2){
 
@@ -275,21 +278,21 @@ calcPPA_STP_Track <- function(STP_track,x_density=250){
 
 }
 
-#' @title calcPPA_STP_Tinterval
-#' @description Function for calculating PPA for specific time range
-#' @param STP_track The STP_track for which the PPA needs to be calculated
-#' @param time_range time range ("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
-#' @param x_density Paramter used for calculating the PPA of entire STPs.
-#' The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
-#' Only relevant if the PPA for at least 1 complete STP needs to be calculated
-#' @param time_interval(minutes) The time interval used for calculating the PPA.
-#' Only used for calculating the PPA for a specfic moment in time and
-#' if only a part of the PPA of a STP needs to be calculated.
-#' Default is every minute
-#' @param quadsegs Passed to buffer. Number of line segments to use to approximate a quarter circle.
-#' Only used where paramter time_interval is relavant
-#' @return The Potential Path Area for the time range as SpatialPolygons
-#' @author Mark ten Vregelaar
+# @title calcPPA_STP_Tinterval
+# @description Function for calculating PPA for specific time range
+# @param STP_track The STP_track for which the PPA needs to be calculated
+# @param time_range time range ("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
+# @param x_density Paramter used for calculating the PPA of entire STPs.
+# The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
+# Only relevant if the PPA for at least 1 complete STP needs to be calculated
+# @param time_interval(minutes) The time interval used for calculating the PPA.
+# Only used for calculating the PPA for a specfic moment in time and
+# if only a part of the PPA of a STP needs to be calculated.
+# Default is every minute
+# @param quadsegs Passed to buffer. Number of line segments to use to approximate a quarter circle.
+# Only used where paramter time_interval is relavant
+# @return The Potential Path Area for the time range as SpatialPolygons
+# @author Mark ten Vregelaar
 #'
 calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, quadsegs){# can be done smarter
 
@@ -395,14 +398,14 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
   }
 }
 
+# @title in_time_range
+# @description Function that checks if the time is within the time_range
+# @param time time (POSIXct): time
+# @param time_range time_range(two POSIXct): the time range
+#
+# @return True or False(logical): True if time within time_Range
 in_time_range <- function(time, time_range){
-  #' Function that check if the time is within the time_range
-  #'    Arg:
-  #'          time (POSIXct): time
-  #'          time_range(two POSIXct): the time range
-  #'
-  #'    Return:
-  #'          True or False(logical): True if time within time_Range
+
   stopifnot(length(time_range) == 2L)
 
   time>time_range[1] & time<time_range[2]
@@ -410,14 +413,14 @@ in_time_range <- function(time, time_range){
 }
 
 chull_poly <- function(PPAcoords,crs){
-  #' Function that calculates PPA based on convex hull of PPAcoords
-  #'
-  #'    Arg:
-  #'          PPAcoords(matrix): x and y coordiantes
-  #'          crs(CRS): crs of coordinates
-  #'
-  #'    Return:
-  #'         PPA(SpatialPolygons): Potential Path Area
+  # Function that calculates PPA based on convex hull of PPAcoords
+  #
+  #   Arg:
+  #          PPAcoords(matrix): x and y coordiantes
+  #          crs(CRS): crs of coordinates
+  #
+  #    Return:
+  #         PPA(SpatialPolygons): Potential Path Area
   coords<-plyr::rbind.fill.matrix(PPAcoords)
   #coords<-do.call(rbind,PPAS)#<------ other method maybe be faster<________________________
   # convexhull of coords

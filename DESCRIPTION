@@ -8,8 +8,10 @@ Description: INCOMPLETE. Package for handling Space-Time Prism(STP) trajectories
  It contains functions to calculate Potential Path Areas(PPAs), create random
  trajectories and to test for possible encounters by applying the alibi query.
  It also provides functions to visulize the STPs treajectories in 3D.
-Depends: trajectories, rgdal
-Suggests: spacetime
+Depends: trajectories
+Imports: lubridate, maptools, raster, rgeos, rgl, spacetime, plyr, rgdal
+Suggests: knitr,rmarkdown
 License: MIT
 LazyData: TRUE
 RoxygenNote: 6.0.1
+VignetteBuilder: knitr

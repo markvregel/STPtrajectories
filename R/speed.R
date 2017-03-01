@@ -28,13 +28,6 @@ getMinimalSpeed<- function(track){
 #' @author Mark ten Vregelaar
 #' @export
 getVmaxtrack <- function(track){
-  # This functions calculates the maximum speed found in a trajectory.
-  # The maximum speed is based on linear movement between the points.
-  #     Arg:
-  #         track(STP_track or track): the trajectory
-  #      Return:
-  #        	max speed of bear(numeric)
-
   # calculate the required speed to reach every point
   speeds<- getMinimalSpeed(track)
   # return the maximum speed

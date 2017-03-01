@@ -28,3 +28,91 @@ The maximum speed is added to the connections slot
 
 }
 
+\examples{
+library(spacetime)
+library(sp)
+#--------------------------create a STP_Track--------------------------
+#------------------------------example 1------------------------------
+## create trajectory data
+t1 <- as.POSIXct(strptime("01/01/2017 12:00:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
+t2 <- as.POSIXct(strptime("01/7/2017 12:00:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
+time <- seq(t1,t2,2*60*60)
+n <- length(time)
+x = cumsum(runif(n) * 8000)
+y = smooth(cumsum(runif(n,-0.7,1) * 16000))
+
+crs_NL = CRS("+init=epsg:28992")
+
+points <- SpatialPoints(cbind(x,y),crs_NL)
+
+temp <-18 + cumsum(runif(n,-0.3,0.25))
+altitude <- 200 + cumsum(runif(n,-0.75,1)*50)
+
+data <- data.frame(temperature = temp, elevation = altitude)
+## create a STP_track
+# create class STIDF
+stidf1 = STIDF(points, time, data)
+
+# Track-class {trajectories}
+my_track1<-Track(stidf1)
+
+# set maximum speed
+v1<-10/3.6# speed 10 km/h = 2.777778 m/s
+
+# STP_track class
+STP_track1<-STP_Track(my_track1,v1)
+# plot
+plot(STP_track1,type='p',pch=19,cex=0.8)
+# calculate PPA and add to plot
+PPA<-calculate_PPA(STP_track1)
+plot(PPA,add=TRUE)
+
+#------------------------------example 2------------------------------
+## vmax depends on elevation
+# assuming that max speed is lower as result of the thinner air
+vmax<- getVmaxtrack(STP_track1) + (max(STP_track1@data$elevation[1:n-1])-STP_track1@data$elevation[1:n-1])*0.01
+STP_track1@connections$vmax<-vmax
+# calculate PPA
+PPA<-calculate_PPA(STP_track1)
+# create tracksCollection and plot
+tracks = Tracks(list(tr1 = STP_track1))
+tracksCollection = TracksCollection(list(tr = tracks))
+stplot(tracksCollection, attr = "elevation", lwd = 3, scales = list(draw =TRUE),
+      sp.layout=PPA,xlim = PPA@bbox[1,],ylim = PPA@bbox[2,],main= "Track with PPA\\n vmax depends on altitude",
+      sub='colour is altitude in meters',xlab='x',ylab='y')
+#------------------------------example 3------------------------------
+## vmax depends on linear minimal speed to get to next point.
+# Thus on the distance that needs to be covered in the avialable time
+# Assuming that if two points are closer together the max speed is lower
+STP_track1@connections$vmax<-getMinimalSpeed(STP_track1)*1.5
+# calculate PPA
+PPA<-calculate_PPA(STP_track1)
+# create tracksCollection and plot
+plot(PPA,add=TRUE)
+tracks = Tracks(list(tr1 = STP_track1))
+tracksCollection = TracksCollection(list(tr = tracks))
+stplot(tracksCollection, attr = "vmax", lwd = 3, scales = list(draw = TRUE),
+      sp.layout=PPA,xlim = PPA@bbox[1,],ylim = PPA@bbox[2,],
+      main= "Track with PPA\\n vmax depends on the distance and time budget between consecutive points",
+      sub='colour is vmax in m/s',xlab='x',ylab='y',cex.main = 0.75)
+
+
+#--------------------------subset a STP_Track--------------------------
+# make sure vmax is high enough
+STP_track1@connections$vmax<-getVmaxtrack(STP_track1)+1
+#------------------------------example 1------------------------------
+## subset based on space-time points
+# get first 10 points
+STP_track1_10<-STP_track1[1:10,'']
+# only keep every second point
+STP_track1_depleted<-STP_track1[seq(1,n,2),'']
+plot(STP_track1,type='b')
+plot(STP_track1_depleted,type='b')
+#------------------------------example 2------------------------------
+## subset based on time
+STP_track1_a<-STP_track1[1:n,'2017-01-01 12:00:00 CET::2017-01-02 16:00:00 CET']
+# only keep every second point within the time interval
+STP_track1_b<-STP_track1[seq(1,n,2),'2017-01-01 12:00:00 CET::2017-01-02 16:00:00 CET']
+# all points in the night(between 22:00 and 08:00)
+STP_track1_c<-STP_track1[1:n,"T22:00/T08:00"] # see package xts for more handy subsetting tricks
+}

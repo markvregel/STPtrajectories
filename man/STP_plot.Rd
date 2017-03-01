@@ -22,6 +22,7 @@ This function visualizes STPs in 3D
 }
 \examples{
 library(spacetime)
+library(sp)
 ## create 2 STP_tracks
 # time
 t1 <- strptime("01/01/2017 00:00:00", "\%m/\%d/\%Y \%H:\%M:\%S")
@@ -30,9 +31,9 @@ time1<-seq(t1,t2,30*60)
 time2<-time1+0.25*60*60
 # spatial coordinates
 x1=c(seq(0,25,5),seq(27.5,37.5,2.5))
-y1=sample(-2:2, 11,replace = T)
+y1=sample(-2:2, 11,replace = TRUE)
 x2=c(seq(0,25,5),seq(27.5,37.5,2.5))
-y2=sample(-2:2, 11,replace = T)
+y2=sample(-2:2, 11,replace = TRUE)
 
 n = length(x1)
 crs_NL = CRS("+init=epsg:28992")
@@ -57,7 +58,8 @@ z_fac<-0.2 # relative size of z scale/aspect ratio to spatial scale
 # plot STPS first STP_track
 STP_plot(STP_track1,time_interval = 1,z_fac)
 # plot STPS second STP_track
-STP_plot(STP_track2,time_interval = 1,z_fac,'blue',st = STP_track1@endTime[1])# provide st for correct starting location first STP
+STP_plot(STP_track2,time_interval = 1,z_fac,'blue',st = STP_track1@endTime[1])
+# provide st for correct starting location first STP
 
 # calculate first and last moment in time
 min_max_Time<-c(STP_track1@endTime[1],STP_track2@endTime[length(STP_track2)])

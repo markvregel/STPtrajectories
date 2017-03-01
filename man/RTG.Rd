@@ -36,6 +36,8 @@ The added points are evenly divided over time and are always within the space-ti
 }
 \examples{
 library(spacetime)
+library(sp)
+#------------------------------example 1------------------------------
 ## Create a random trajecory based on a begin and end point
 ## Create trajectory with only two points
 # Time
@@ -61,10 +63,10 @@ plot(STP1,type='p',col='red',pch=16,cex=2)
 
 # Create a random trajectory between the two points
 random_STP_track<-RTG(STP1,n_points = 10)
-plot(random_STP_track,type='b',add=T)
+plot(random_STP_track,type='b',add=TRUE)
 
+#------------------------------example 2------------------------------
 ## Add points to a trajectory with multple points
-
 ## Create a STP_track
 np <-6 # Number of points orignal track
 t1 <- as.POSIXct(strptime("01/01/2017 00:00:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
@@ -95,11 +97,11 @@ plot(STP_track2,type='p',col='red',pch=16,cex=2)
 ## Fill blank spot of trajecotries in two steps
 # Add 2 random points in between two sapce-time points that more than 90 minutes apart
 filled_track1 <-RTG(STP_track2,n_points = 2,max_time_interval = 120)
-plot(filled_track1,type='p',pch=16,add=T,col='blue')
+plot(filled_track1,type='p',pch=16,add=TRUE,col='blue')
 
 # Add 1 random point in between two sapce-time points that more than 45 minutes apart
 filled_track2 <-RTG(filled_track1,n_points = 1,max_time_interval = 60)
-plot(filled_track2,type='b',add=T,cex=0.7)
+plot(filled_track2,type='b',add=TRUE,cex=0.7)
 }
 \references{
 - Technitis, G., Othman, W., Safi, K., & Weibel, R. (2015).

@@ -32,17 +32,19 @@ The Potential Path Area as SpatialPolygons
 }
 \description{
 Function for calculating the Potetial Path Area(PPA) of a STP_track.
-The function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
+This function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
 }
 \examples{
-require(spacetime)
-## create a STP_track
+library(spacetime)
+library(sp)
+#--------------------------create a STP_Track--------------------------
+# set time
 t1 <- strptime("01/01/2017 00:00:00", "\%m/\%d/\%Y \%H:\%M:\%S")
 t2 <- t1+5*60*60
 time<-seq(t1,t2,30*60)
-
+# set coordinates
 x=c(seq(0,25,5),seq(27.5,37.5,2.5))
-y=sample(-2:2, 11,replace = T)
+y=sample(-2:2, 11,replace = TRUE)
 
 n = length(x)
 crs_NL = CRS("+init=epsg:28992")
@@ -58,22 +60,23 @@ v1<-getVmaxtrack(my_track1)+0.00015
 
 # STP_track class
 STP_track1<-STP_Track(my_track1,v1)
-
+#------------------------------example 1------------------------------
 ## PPA entire track
 #calculate PPA
 PPA<-calculate_PPA(STP_track1)
 
 # plot results
 plot(STP_track1,type='b')
-plot(PPA,add=T)
-
+plot(PPA,add=TRUE)
+#------------------------------example 2------------------------------
 ## PPA only using every second point
 # calculate PPA
 PPA<-calculate_PPA(STP_track1,points = seq(1,11,2))
 
 # plot results
 plot(STP_track1,type='b')
-plot(PPA,add=T)
+plot(PPA,add=TRUE)
+#------------------------------example 3------------------------------
 ## PPA of a specfic moment in time
 # calculate PPA
 time <- strptime("01/01/2017 01:15:00", "\%m/\%d/\%Y \%H:\%M:\%S")
@@ -81,8 +84,8 @@ PPA<-calculate_PPA(STP_track1,time = time)
 
 # plot results
 plot(STP_track1,type='b')
-plot(PPA,add=T)
-
+plot(PPA,add=TRUE)
+#------------------------------example 4------------------------------
 ## PPA for a time range
 # calculate PPA
 timerange1 <- c(t1,strptime("01/01/2017 02:15:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
@@ -90,8 +93,7 @@ PPA<-calculate_PPA(STP_track1,time = timerange1)
 
 # plot results
 plot(STP_track1,type='b')
-plot(PPA,add=T)
-
+plot(PPA,add=TRUE)
 }
 \author{
 Mark ten Vregelaar
