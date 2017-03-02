@@ -12,7 +12,8 @@ STP_Track(track, vmax)
 \description{
 A class to represent Space-Time Prism(STP) trajecories.
 These are trajectories with a maximum speed for each segment.
-The maximum speed is added to the connections slot
+The maximum speed is added to the connections slot of class \link{Track}.
+The STP_Track can also combined in classes \link{Tracks} and \link{TracksColletion} of the trajecories package
 }
 \section{Slots of class "Track"}{
 
@@ -115,4 +116,7 @@ STP_track1_a<-STP_track1[1:n,'2017-01-01 12:00:00 CET::2017-01-02 16:00:00 CET']
 STP_track1_b<-STP_track1[seq(1,n,2),'2017-01-01 12:00:00 CET::2017-01-02 16:00:00 CET']
 # all points in the night(between 22:00 and 08:00)
 STP_track1_c<-STP_track1[1:n,"T22:00/T08:00"] # see package xts for more handy subsetting tricks
+}
+\seealso{
+rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 }

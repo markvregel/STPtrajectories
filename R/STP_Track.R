@@ -1,9 +1,11 @@
 #' @title STP_Track class
 #' @description A class to represent Space-Time Prism(STP) trajecories.
 #' These are trajectories with a maximum speed for each segment.
-#' The maximum speed is added to the connections slot
+#' The maximum speed is added to the connections slot of class \link{Track}.
+#' The STP_Track can also combined in classes \link{Tracks} and \link{TracksColletion} of the trajecories package
 #' @param Track object of class  \link{Track}
 #' @inheritSection trajectories::Track Slots of class "Track"
+#' @seealso rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 #' @examples
 #'library(spacetime)
 #'library(sp)

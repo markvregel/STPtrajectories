@@ -14,7 +14,7 @@ Installation
 
 # the the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("markvregel/STPtrajectories")
+devtools::install_github("markvregel/STPtrajectories,build_vignettes=TRUE")
 ```
 
 Usage

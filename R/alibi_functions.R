@@ -30,7 +30,7 @@
 #' @export
 #' @keywords internal
 alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
-  print(c(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
+  #print(c(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
   if(!(IsBeadNonEmpty(t1, x1, y1, t2, x2, y2, v1) &&
        IsBeadNonEmpty(t3, x3, y3, t4, x4, y4, v2))){
     stop("STP is not valid")

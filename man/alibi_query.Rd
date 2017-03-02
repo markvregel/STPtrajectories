@@ -15,13 +15,49 @@ alibi_query(STP_track1, STP_track2)
 True or False for the alibi query
 }
 \description{
-CONTAINS ERRORS. CASE 3 goed wrong!!!
+CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!
 This function tests wether there was a possible meeting between two individuals or other moving objects.
 If the individuals of two trajecories could have met is tested by applying the alibi query to segments that overlap in time.
 The alibi query is a Boolean query that checks whether two moving individuals,
 that are given by two samples of space-time points and speed limitations, could have met each other.
 The query tests if two space-time prisms intersect.
 Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function
+}
+\examples{
+library(spacetime)
+library(sp)
+
+## create 2 STP_tracks
+# time
+t1 <- strptime("01/01/2017 00:00:00", "\%m/\%d/\%Y \%H:\%M:\%S")
+t2 <- t1+5*60*60 # 5 hours after t1
+time1<-seq(t1,t2,30*60)
+time2<-time1+0.25*60*60
+# spatial coordinates
+x1=c(seq(0,25,5),seq(27.5,37.5,2.5))
+y1=sample(-2:2, 11,replace = TRUE)
+x2=c(seq(0,25,5),seq(27.5,37.5,2.5))
+y2=sample(-2:2, 11,replace = TRUE)
+
+n = length(x1)
+crs_NL = CRS("+init=epsg:28992")
+
+# create class STIDF
+stidf1 = STIDF(SpatialPoints(cbind(x1,y1),crs_NL), time1, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+stidf2 = STIDF(SpatialPoints(cbind(x2,y2),crs_NL), time2, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+
+# Track-class {trajectories}
+my_track1<-Track(stidf1)
+my_track2<-Track(stidf2)
+# set maximum speed
+v1<-getVmaxtrack(my_track1)+0.00015
+v2<-getVmaxtrack(my_track2)+0.00030
+# STP_track class
+STP_track1<-STP_Track(my_track1,v1)
+STP_track2<-STP_Track(my_track2,v2)
+
+## the alibi query
+alibi_query(STP_track1,STP_track2)
 }
 \references{
 - 	Kuijpers, B., Grimson, R., & Othman, W. (2011).
