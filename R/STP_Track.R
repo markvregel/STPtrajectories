@@ -57,7 +57,7 @@
 #'       sp.layout=PPA,xlim = PPA@bbox[1,],ylim = PPA@bbox[2,],main= "Track with PPA\n vmax depends on altitude",
 #'       sub='colour is altitude in meters',xlab='x',ylab='y')
 #'#------------------------------example 3------------------------------
-#'## vmax depends on linear minimal speed to get to next point.
+#'## vmax depends on the distance to get to next point.
 #'# Thus on the distance that needs to be covered in the avialable time
 #'# Assuming that if two points are closer together the max speed is lower
 #'STP_track1@connections$vmax<-getMinimalSpeed(STP_track1)*1.5
@@ -133,7 +133,7 @@ subs.STP_Track <- function(x, i, j, ..., drop = TRUE) {
   track<-Track(as(x, "STIDF")[i, j, ..., drop = drop])
 
   vmax<-x[['vmax']][x@endTime %in% track@endTime]
-  if ((1 %in% diff(x@endTime %in% track@endTime)) & (-1 %in% diff(x@endTime %in% track@endTime))){
+  if (max(diff(which(x@endTime %in% track@endTime,TRUE)))>1){
     warning('Some intermediate space-time points will be removed. If vmax values differ along the STP_track, the vmax values might change.
             The maxmimum speed of a new line segments will depend on the first point of the segment')
   }
@@ -142,3 +142,7 @@ subs.STP_Track <- function(x, i, j, ..., drop = TRUE) {
 }
 
 setMethod("[", "STP_Track", subs.STP_Track)
+
+
+
+
