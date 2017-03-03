@@ -4,7 +4,7 @@ alibi_STP <- function(STP1,STP2){
 
   ts<-c(STP1@endTime[1],STP1@endTime[2],STP2@endTime[1],STP2@endTime[2])
   tmin<-min(ts)
-  ts<-abs(as.numeric(difftime(tmin,ts,units = 'hours')))#<--------------------------
+  ts<-abs(as.numeric(difftime(tmin,ts,units = 'secs')))#<--------------------------
   t1<-ts[1];t2<-ts[2];t3<-ts[3];t4<-ts[4]
 
   x1 <- STP1@sp@coords[1,1]
@@ -13,7 +13,7 @@ alibi_STP <- function(STP1,STP2){
   y1 <- STP1@sp@coords[1,2]
   y2 <- STP1@sp@coords[2,2]
 
-  v1 <- STP1@connections$vmax*3600
+  v1 <- STP1@connections$vmax
 
   x3 <- STP2@sp@coords[1,1]
   x4 <- STP2@sp@coords[2,1]
@@ -21,10 +21,10 @@ alibi_STP <- function(STP1,STP2){
   y3 <- STP2@sp@coords[1,2]
   y4 <- STP2@sp@coords[2,2]
 
-  v2 <- STP2@connections$vmax*3600
-  # print(c(t1,t2,t3,t4))
-  # print(c(t1, x1, y1, t2, x2, y2, v1))
-  # print(c(t3, x3, y3, t4, x4, y4,v2))
+  v2 <- STP2@connections$vmax
+   #print(c(t1,t2,t3,t4))
+   #print(c(t1, x1, y1, t2, x2, y2, v1))
+   #print(c(t3, x3, y3, t4, x4, y4,v2))
   return(alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
 }
 

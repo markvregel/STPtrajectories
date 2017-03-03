@@ -2,57 +2,158 @@
 title: "Space-time prism trajectories"
 author: "Mark ten Vregelaar"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
+    fig_width: 7
+    fig_height: 5
+
+
 vignette: >
   %\VignetteIndexEntry{Space-time prism trajectories}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
-## UNDER CONSTRUCTION
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+# Introduction
 
-## Vignette Info
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+This vignette is meant to show an example of what is possible with the STPtrajectories package. In this vignette two STP_Tracks are created and Analysed. Altough the tracks are randomly generated, they are meant to reperesent two bears. 
+The following steps will be implemeted:
 
-## Styles
+* Create two pairs of space-time points using the STP_Track class. 
+* Add more points by applying the random trajectory generator(RTG)
+* Calculate the PPA area for both tracks
+* Apply the alibi query
+* Visulise the STPtrajectories
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
 
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
+All the functions avaliable in the package will be used.
 
-## Figures
+```{r,include=FALSE}
+library(STPtrajectories)
+```
+<center>__The functions of the STPtrajectories package:__</center>
 
-The figure sizes have been customised so that you can easily put two images side-by-side. 
+```{r, echo=FALSE,results='asis'}
+knitr::kable(matrix(ls("package:STPtrajectories")[-1],ncol=4),caption = '')
+```
+# The example project
 
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+
+First Load the required packages
+```{r setup}
+library(sp)
+library(spacetime)
+library(knitr)
+library(rgl)
+knit_hooks$set(webgl = hook_webgl)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## Create two pairs of space-time points
+```{r}
+crs_NL = CRS("+init=epsg:28992")
+t1 <- as.POSIXct(strptime("01/01/2017 12:00:00", "%m/%d/%Y %H:%M:%S"))
+t2 <- as.POSIXct(strptime("01/01/2017 15:00:00", "%m/%d/%Y %H:%M:%S"))
+time<-c(t1,t2)
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
 
-## More Examples
+# Spatial coordinates
+x_bear1=c(7500,10);y_bear1=c(10,6000)
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+x_bear2=c(20,8000);y_bear2=c(30,7000)
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+n = length(x_bear1)
+
+# create class STIDF {spacetime}
+stidf_bear1 = STIDF(SpatialPoints(cbind(x_bear1,y_bear1),crs_NL), time, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+stidf_bear2 = STIDF(SpatialPoints(cbind(x_bear2,y_bear2),crs_NL), time, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+
+# Track-class {trajectories}
+track_bear1<-Track(stidf_bear1)
+track_bear2<-Track(stidf_bear2)
+# Set maximum speed 
+# max speed for a period of 3 hours
+v_bear1<-5/3.6
+v_bear2<-6/3.6
+# STP_track class
+STP_bear1<-STP_Track(track_bear1,v_bear1)
+STP_bear2<-STP_Track(track_bear2,v_bear2)
+# plot the points
+plot(STP_bear1,type='p',col='red',pch=16,cex=2,xlim=c(0,9000),ylim=c(0,8000),xlab='x (meters)',
+     ylab='y (meters)', main= 'Start and end locations of bear trajecories')
+plot(STP_bear2,type='p',col='blue',pch=16,cex=2,add=T)
+legend('topright',c('Bear 1','Bear 2'),pch = 16,col=c('red','blue'))
+text(c(x_bear1,x_bear2), c(y_bear1,y_bear2), labels=c('start','end'), cex= 1.2,adj= c(0.5,-1))
+```
+ 
+## Apply random trajectory generator(RTG)
+```{r}
+## Create trajecotires using the RTG
+# set seed to create same trajecory
+set.seed(10)
+STP_track_bear1<-RTG(STP_bear1,n_points = 15)
+set.seed(2)
+STP_track_bear2<-RTG(STP_bear2,n_points = 15)
+
+# plot results
+plot(STP_track_bear1,type='b',col='red',pch=16,cex=0.8,xlim=c(-1000,12000),ylim=c(-500,9000),xlab='x (meters)',ylab='y (meters)', main= 'The two bear trajecories')
+plot(STP_track_bear2,type='b',col='blue',pch=16,cex=0.8,add=T)
+legend('topright',c('Bear 1','Bear 2'),pch = 16,lty =1, col=c('red','blue'))
+
 ```
 
-Also a quote using `>`:
+## Calculate the PPA area 
+The time difference between the space-time points is now a bit over 11 minutes and thus are the maximum speeds of 5 and 6 km/h not realsitic. A more realstic max speed is 1.5 times the speed required to reach every point.
+```{r}
+# calculate the new maximum speed
+vmax_bear1<-getVmaxtrack(STP_track_bear1)*1.5
+vmax_bear2<-getVmaxtrack(STP_track_bear2)*1.5
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+STP_track_bear1@connections$vmax<-vmax_bear1
+STP_track_bear2@connections$vmax<-vmax_bear2
+
+PPA_bear1 <- calculate_PPA(STP_track_bear1)
+PPA_bear2 <- calculate_PPA(STP_track_bear2)
+
+
+# plot results
+plot(STP_track_bear1,type='b',col='red',pch=16,cex=0.8,xlim=c(-1000,12000),ylim=c(-500,9000),xlab='x (meters)',ylab='y (meters)', main= 'The two bear trajecories with PPA')
+plot(STP_track_bear2,type='b',col='blue',pch=16,cex=0.8,add=T)
+legend('topright',c('Bear 1','Bear 2'),pch = 16,lty =1, col=c('red','blue'))
+
+
+plot(PPA_bear1,add=T)
+plot(PPA_bear2,add=T)
+
+```
+## the alibi query
+
+The figure above shows a spatial intersetion between the trajectories. To test wether they could have been at the same location at the same time you can apply the alibi query.
+```{r alibi_query}
+alibi_query(STP_track_bear1,STP_track_bear2)# not always correct. package still in development
+
+```
+## visulise STP_tracks
+```{r STP_plot, webgl=TRUE}
+STP_plot(STP_track_bear1,time_interval = 1,zfactor = 45)
+STP_plot(STP_track_bear2,time_interval = 1,zfactor = 45,st = STP_track_bear1@endTime[1],col = 'blue')
+
+
+title3d(main = "3D Visualisation of STP_tracks",cex=1.3)
+bg3d('lightblue')
+
+  tdif<-as.numeric(difftime(time[2],time[1],units = 'mins'))
+  tickval<-seq(0,tdif*45,length.out = 5)
+
+  timesval<-seq(time[1],time[2],length.out = 5)
+  axes3d(c('x','y'))
+  axis3d('z',at=tickval,labels = timesval)
+  box3d()
+```
+
+See also:
+
+[github](https://github.com/markvregel/STPtrajectories)

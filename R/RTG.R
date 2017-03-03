@@ -167,10 +167,15 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
     all_points<-rbind(all_points,points[points$time %in% shuffled_times,])# points[3:n_points,]
 
   }
+  # fix order
+  all_points<-all_points[order(all_points$time),]
+  rownames(all_points@data)<-1:n_points
+  data_template<-STP_track@data
+  data_template[]<-NA
   # create class STIDF
-  random_STIDF = STIDF(all_points, all_points$time, data.frame(STP@data))
+  random_STIDF = STIDF(all_points, all_points$time, data_template)
   # return original data
-  random_STIDF@data[random_STIDF@endTime %in% STP_track@endTime,] = STP_track@data
+  random_STIDF@data[random_STIDF@endTime %in% STP_track@endTime,] <- STP_track@data
   # Track-class {trajectories}
   random_track<-Track(random_STIDF)
   # STP_track class
