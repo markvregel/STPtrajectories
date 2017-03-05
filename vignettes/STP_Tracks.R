@@ -61,7 +61,7 @@ legend('topright',c('Bear 1','Bear 2'),pch = 16,lty =1, col=c('red','blue'))
 
 
 ## ------------------------------------------------------------------------
-# calculate the new maximum speed
+# set the new maximum speed
 vmax_bear1<-getVmaxtrack(STP_track_bear1)*1.5
 vmax_bear2<-getVmaxtrack(STP_track_bear2)*1.5
 
@@ -90,15 +90,16 @@ alibi_query(STP_track_bear1,STP_track_bear2)# not always correct. package still 
 STP_plot(STP_track_bear1,time_interval = 1,zfactor = 45)
 STP_plot(STP_track_bear2,time_interval = 1,zfactor = 45,st = STP_track_bear1@endTime[1],col = 'blue')
 
-
-title3d(main = "3D Visualisation of STP_tracks",cex=1.3)
+# add axes
+#axes_STP_plot(time,z_factor = 45) function to add axes but not suitable for Rmarkdown
+title3d(main = "3D Visualisation of STP_tracks",xlab='x',ylab='y',cex=1.3)
 bg3d('lightblue')
-
-  tdif<-as.numeric(difftime(time[2],time[1],units = 'mins'))
-  tickval<-seq(0,tdif*45,length.out = 5)
-
-  timesval<-seq(time[1],time[2],length.out = 5)
-  axes3d(c('x','y'))
-  axis3d('z',at=tickval,labels = timesval)
-  box3d()
+# data time axis
+tdif<-as.numeric(difftime(time[2],time[1],units = 'mins'))
+tickval<-seq(0,tdif*45,length.out = 5)
+timesval<-seq(time[1],time[2],length.out = 5)
+# add axes
+axes3d(c('x','y'),xlab='x')
+axis3d('z',at=tickval,labels = timesval)
+box3d()
 

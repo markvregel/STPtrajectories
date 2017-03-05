@@ -116,7 +116,7 @@ for (i in 1:(length(track1)-1)){
         result<-alibi_STP(STP1,STP2)
 
         if (result){
-          print(c(i,j, "True"))
+          message(c(TRUE, paste(': possibe intersection for STPS',i,'and',j)))
           return(result)
 
         }

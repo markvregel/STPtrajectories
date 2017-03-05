@@ -1,4 +1,4 @@
-<img src="logo.png" align="right" width="50%" height="50%"/>
+<img src="logo.png" align="right" width="30%" height="30%"/>
 
 Overview
 --------
@@ -7,6 +7,7 @@ PACKAGE IS INCOMPLETE AND CONTAINS ERRORS. Package for handling Space-Time Prism
  It contains functions to calculate Potential Path Areas(PPAs), create random
  trajectories and to test for possible encounters by applying the alibi query.
  It also provides functions to visulize the STPs treajectories in 3D.
+ 
 Installation
 ------------
 
@@ -14,14 +15,16 @@ Installation
 
 # the the development version from GitHub:
 # install.packages("devtools")
-devtools::install_github("markvregel/STPtrajectories,build_vignettes=TRUE")
+devtools::install_github("markvregel/STPtrajectories"",build_vignettes=TRUE)
 ```
 
 Usage
 -----
 
+Creating a STP_Track
 
 ``` r
+library(STPtrajectories)
 library(spacetime)
 library(sp)
 #--------------------------create a STP_Track--------------------------
@@ -41,6 +44,7 @@ temp <-18 + cumsum(runif(n,-0.3,0.25))
 altitude <- 200 + cumsum(runif(n,-0.75,1)*50)
 
 data <- data.frame(temperature = temp, elevation = altitude)
+
 ## create a STP_track
 # create class STIDF
 stidf1 = STIDF(points, time, data)
@@ -53,14 +57,7 @@ v1<-10/3.6# speed 10 km/h = 2.777778 m/s
 
 # STP_track class
 STP_track1<-STP_Track(my_track1,v1)
-# plot
-plot(STP_track1,type='p',pch=19,cex=0.8)
-# calculate PPA and add to plot
-PPA<-calculate_PPA(STP_track1)
-plot(PPA,add=TRUE)
 ```
-
-[Also take look at package trajectories](https://github.com/edzer/trajectories)
 
 Learning to use STPtrajectories
 ----------------
@@ -68,6 +65,7 @@ Learning to use STPtrajectories
 Getting help
 ------------
 1. Check function help
-2. Search in the manual: STPtrajectories.pdf
-3. Read the vignettes
+2. Search in the manual: [STPtrajectories.pdf](https://github.com/markvregel/STPtrajectories/blob/master/STPtrajectories.pdf)
+3. [Read the vignettes](http://htmlpreview.github.io/?https://raw.githubusercontent.com/markvregel/STPtrajectories/master/vignettes/STP_Tracks.html)
 
+[Also look at the help of the trajecoties package](https://cran.rstudio.com/web/packages/trajectories/index.html)

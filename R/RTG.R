@@ -169,7 +169,7 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
   }
   # fix order
   all_points<-all_points[order(all_points$time),]
-  rownames(all_points@data)<-1:n_points
+  rownames(all_points@data)<-1:length(all_points)
   data_template<-STP_track@data
   data_template[]<-NA
   # create class STIDF
@@ -180,6 +180,6 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
   random_track<-Track(random_STIDF)
   # STP_track class
   random_STP<-STP_Track(random_track,STP@connections$vmax)
-
+  return(random_STP)
 }
 

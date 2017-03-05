@@ -14,7 +14,7 @@ Vector of minimal speeds in unit spatial projection unit/s The speed required to
 in the available time
 }
 \description{
-This functions calculates the minimal speed required to reach every point
+This functions calculates the minimal speed required to reach every point.
 The  speed is based on linear movement between two points.
 }
 \author{

@@ -1,5 +1,5 @@
 #' @title getMinimalSpeed
-#' @description   This functions calculates the minimal speed required to reach every point
+#' @description   This functions calculates the minimal speed required to reach every point.
 #' The  speed is based on linear movement between two points.
 #' @param track the trajectory as \link{STP_Track} or \link{Track}
 #' @return Vector of minimal speeds in unit spatial projection unit/s The speed required to reach the next point

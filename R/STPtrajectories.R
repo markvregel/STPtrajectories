@@ -22,7 +22,7 @@
 #'  \strong{need help:}
 #' \itemize{
 #' \item manual: \url{https://github.com/markvregel/STPtrajectories/blob/master/STPtrajectories.pdf}
-#' \item vignette
+#' \item vignette: \url{http://htmlpreview.github.io/?https://raw.githubusercontent.com/markvregel/STPtrajectories/master/vignettes/STP_Tracks.html}
 #' \item check functions help and examples
 #' }
 #' @seealso
