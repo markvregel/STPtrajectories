@@ -85,22 +85,22 @@ alibi_query(STP_track_bear1,STP_track_bear2)# not always correct. package still 
 
 
 ## ----STP_plot, webgl=TRUE------------------------------------------------
-# zfac<- 50 # aspect ration between sptatial axes and time axis
-# t_int <- 0.8 # determines how many PPAs are used to visualise STPs.
-# 
-# STP_plot(STP_track_bear1,time_interval = t_int,zfactor = zfac)
-# STP_plot(STP_track_bear2,time_interval = t_int,zfactor = zfac,st = STP_track_bear1@endTime[1],col = 'blue')
-# 
-# # add axes
-# #axes_STP_plot(time,z_factor = zfac) function to add axes but not suitable for Rmarkdown
-# title3d(main = "3D Visualisation of STP_tracks",xlab='x',ylab='y',cex=1.3)
-# bg3d('lightblue')
-# # data time axis
-# tdif<-as.numeric(difftime(time[2],time[1],units = 'mins'))
-# tickval<-seq(0,tdif*zfac,length.out = 5)
-# timesval<-seq(time[1],time[2],length.out = 5)
-# # add axes
-# axes3d(c('x','y'),xlab='x')
-# axis3d('z',at=tickval,labels = timesval,cex=0.8)
-# box3d()
+zfac<- 50 # aspect ration between sptatial axes and time axis
+t_int <- 0.8 # determines how many PPAs are used to visualise STPs.
+
+STP_plot(STP_track_bear1,time_interval = t_int,zfactor = zfac)
+STP_plot(STP_track_bear2,time_interval = t_int,zfactor = zfac,st = STP_track_bear1@endTime[1],col = 'blue')
+
+# add axes
+#axes_STP_plot(time,z_factor = zfac) function to add axes but not suitable for Rmarkdown
+title3d(main = "3D Visualisation of STP_tracks",xlab='x',ylab='y',cex=1.3)
+bg3d('lightblue')
+# data time axis
+tdif<-as.numeric(difftime(time[2],time[1],units = 'mins'))
+tickval<-seq(0,tdif*zfac,length.out = 5)
+timesval<-seq(time[1],time[2],length.out = 5)
+# add axes
+axes3d(c('x','y'),xlab='x')
+axis3d('z',at=tickval,labels = timesval,cex=0.8)
+box3d()
 
