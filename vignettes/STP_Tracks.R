@@ -30,7 +30,7 @@ stidf_bear2 = STIDF(SpatialPoints(cbind(x_bear2,y_bear2),crs_NL), time, data.fra
 track_bear1<-Track(stidf_bear1)
 track_bear2<-Track(stidf_bear2)
 # Set maximum speed 
-# max speed for a period of 3 hours
+# max speed for a period of 3 hours in m/s
 v_bear1<-5/3.6
 v_bear2<-6/3.6
 # STP_track class
@@ -58,9 +58,9 @@ legend('topright',c('Bear 1','Bear 2'),pch = 16,lty =1, col=c('red','blue'))
 
 
 ## ------------------------------------------------------------------------
-# set the new maximum speed. different for every segment
-vmax_bear1<-STP_track_bear1@connections$speed*1.5
-vmax_bear2<-STP_track_bear2@connections$speed*1.5
+# set the new maximum speed. Same for every segment
+vmax_bear1<-getVmaxtrack(STP_track_bear1)*1.5
+vmax_bear2<-getVmaxtrack(STP_track_bear2)*1.5
 
 STP_track_bear1@connections$vmax<-vmax_bear1
 STP_track_bear2@connections$vmax<-vmax_bear2
