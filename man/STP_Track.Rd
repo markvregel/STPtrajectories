@@ -85,7 +85,7 @@ stplot(tracksCollection, attr = "elevation", lwd = 3, scales = list(draw =TRUE),
 ## vmax depends on the distance to get to next point.
 # Thus on the distance that needs to be covered in the avialable time
 # Assuming that if two points are closer together the max speed is lower
-STP_track1@connections$vmax<-getMinimalSpeed(STP_track1)*1.5
+STP_track1@connections$vmax<-STP_track1@connections$speed*1.5
 # calculate PPA
 PPA<-calculate_PPA(STP_track1)
 # create tracksCollection and plot

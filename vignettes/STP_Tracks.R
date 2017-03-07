@@ -1,8 +1,12 @@
 ## ----include=FALSE-------------------------------------------------------
 library(STPtrajectories)
 
-## ---- echo=FALSE,results='asis'------------------------------------------
-knitr::kable(matrix(ls("package:STPtrajectories")[-1],ncol=4),caption = '')
+## ---- echo=FALSE,results='asis',warning=FALSE----------------------------
+ma<-matrix(ls("package:STPtrajectories")[-1],ncol=4)
+ma[2,4]<-''
+knitr::kable(ma)
+
+
 
 ## ----setup---------------------------------------------------------------
 library(sp)
