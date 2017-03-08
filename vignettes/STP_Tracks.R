@@ -81,7 +81,7 @@ plot(PPA_bear2,add=T)
 
 
 ## ----alibi_query---------------------------------------------------------
-alibi_query(STP_track_bear1,STP_track_bear2)# not always correct. package still in development
+alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = T)# not always correct. package still in development
 
 
 ## ----STP_plot, webgl=TRUE------------------------------------------------

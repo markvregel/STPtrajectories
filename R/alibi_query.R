@@ -39,7 +39,8 @@ alibi_STP <- function(STP1,STP2){
 #' Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function
 #' @param STP_track1 STP_track1
 #' @param STP_track2 STP_track2
-#' @return True or False for the alibi query
+#' @param stop_if_true logigal:Stop if intersection is found or not. Default=TRUE
+#' @return If TRUE returns vector space-time point of intersecting STPs
 #' @author Mark ten Vregelaar
 #' @references - 	Kuijpers, B., Grimson, R., & Othman, W. (2011).
 #' An analytic solution to the alibi query in the space-time prisms model for moving object data.
@@ -81,8 +82,9 @@ alibi_STP <- function(STP1,STP2){
 #'
 #'## the alibi query
 #'alibi_query(STP_track1,STP_track2)
-alibi_query<-function(STP_track1,STP_track2){
-
+alibi_query<-function(STP_track1,STP_track2,stop_if_true=TRUE){
+  #print(class(deparse(substitute(STP_track1))))
+  Switch<-F
 # determine 1st and 2nd STP_track to improve processing time
 if (length(STP_track1)!=length(STP_track2)){
 
@@ -94,6 +96,7 @@ if (length(STP_track1)!=length(STP_track2)){
   if (length(STP_track1)<length(STP_track2)){
     track1<-STP_track2
     track2<-STP_track1
+    Switch<-T
   }
 } else if(difftime(max(STP_track1@endTime),min(STP_track1@endTime))>difftime(max(STP_track2@endTime),min(STP_track2@endTime))){
   track1<-STP_track1
@@ -101,8 +104,12 @@ if (length(STP_track1)!=length(STP_track2)){
 }else{
   track1<-STP_track2
   track2<-STP_track1
+  Switch<-T
 }
+
+
   track2_int<-interval(min(track2@endTime),max(track2@endTime))
+  Trues<-c()
 #apply alibi query to segments is same time interval
 for (i in 1:(length(track1)-1)){
   stp1_int<-interval(track1@endTime[i],track1@endTime[i+1])
@@ -116,18 +123,31 @@ for (i in 1:(length(track1)-1)){
         result<-alibi_STP(STP1,STP2)
 
         if (result){
-          message(c(TRUE, paste(': possibe intersection for STPS',i,'and',j)))
-          return(result)
-
+          if(Switch){
+            STPs<-c(j,i)
+          }else{
+            STPs<-c(i,j)
+          }
+          message(c(TRUE, paste(': possibe intersection for STPs/connections ',STPs[1],'and',STPs[2])))
+          points<-list('a'=STPs[1]:(STPs[1]+1),
+            'b'=STPs[2]:(STPs[2]+1))
+          names(points)<-c(deparse(substitute(STP_track1)),deparse(substitute(STP_track2)))
+          if(stop_if_true){
+          return(points)
+          }else{
+            Trues <- c(Trues,list(points))
+          }
         }
       }
     }
   }
 
 }
-
-return(FALSE)
-
+if (length(Trues)>0){
+  return(Trues)
+  }else{
+  return(FALSE)
+}
 }
 
 

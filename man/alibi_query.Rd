@@ -4,15 +4,17 @@
 \alias{alibi_query}
 \title{alibi_query}
 \usage{
-alibi_query(STP_track1, STP_track2)
+alibi_query(STP_track1, STP_track2, stop_if_true = TRUE)
 }
 \arguments{
 \item{STP_track1}{STP_track1}
 
 \item{STP_track2}{STP_track2}
+
+\item{stop_if_true}{logigal:Stop if intersection is found or not. Default=TRUE}
 }
 \value{
-True or False for the alibi query
+If TRUE returns vector space-time point of intersecting STPs
 }
 \description{
 CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!
