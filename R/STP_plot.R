@@ -1,12 +1,13 @@
 #visulize STPs
 # fix Cannot triangulate polygon
 #' @title STP_plot
-#' @description This function visualizes STPs in 3D
-#' @param STP_track A STP_Track
-#' @param time_interval the time interval in minutes.Determines the amount of PPAs that are plotted
-#' @param zfactor realtive size of z axis compared to x and y axis
-#' @param color of STP(s)
-#' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime
+#' @description This function visualizes STPs in 3D.
+#' @param STP_track A STP_Track.
+#' @param time_interval the time interval in minutes.Determines the amount of PPAs that are plotted.
+#' @param zfactor realtive size of z axis compared to x and y axis.
+#' @param color of STP(s).
+#' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.
+#' @param point_uncertainty uncertainty of space-time points. Default = 0.
 #' @importFrom  rgl translate3d extrude3d shade3d
 #' @author Mark ten Vregelaar
 #' @export
@@ -60,7 +61,7 @@
 #'library(rgl)
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
-STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL){
+STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_uncertainty=0){
   #   Return:
   #         No return
   # if no st provided. start at first time of STP_track
@@ -76,7 +77,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL){
 
   #calculate PPAS
   PPAS<-lapply(times, function(x) {
-    calc_PPA(STP_track, x)
+    calculate_PPA(STP_track, x,point_uncertainty=point_uncertainty)
   })
   # remove NAs for PPAs that could not be calculated
   NAs<-!is.na(PPAS)

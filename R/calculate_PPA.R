@@ -8,14 +8,15 @@
 #' @param points The points used for the PPA calculation given as a vector of integers. Default is NULL: calculate PPA for entire STP_track
 #' @param x_density Paramter used for calculating the PPA of entire STPs.
 #' The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
-#' Only relevant if the PPA for at least 1 complete STP needs to be calculated
+#' Only relevant if the PPA for at least 1 complete STP needs to be calculated.
 #' @param time_interval The time interval in minutes used for calculating the PPA.
 #' Only used for calculating the PPA for a specfic moment in time and
 #' if only a part of the PPA of a STP needs to be calculated.
 #' Default is every minute
 #' @param quadsegs Passed to buffer. Number of line segments to use to approximate a quarter circle.
-#' Only used where paramter time_interval is relavant
-#' @return The Potential Path Area as SpatialPolygons
+#' Only used where paramter time_interval is relavant.
+#' @param point_uncertainty uncertainty of space-time points. Default = 0.
+#' @return The Potential Path Area as SpatialPolygons.
 #' @author Mark ten Vregelaar
 #' @importMethodsFrom raster bind
 #' @importFrom rgeos gBuffer gIntersection gUnaryUnion
@@ -82,17 +83,31 @@
 #'# plot results
 #'plot(STP_track1,type='b')
 #'plot(PPA,add=TRUE)
-calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250, time_interval= 1, quadsegs=12){
+calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250,
+                          time_interval= 1, quadsegs=12,point_uncertainty=0){
   if (!is.null(points)){
-    STP_track <-STP_track[points,'']
+    result<-STP_track <-STP_track[points,'']
   }
    if (length(time)==1){
-      calc_PPA(STP_track,time[1],qs=quadsegs)
+     result<-calc_PPA(STP_track,time[1],qs=quadsegs,point_uncertainty=point_uncertainty)
+     if (time[1] %in% STP_track@endTime & isS4(result)){
+       return(result)
+     }
     } else if (length(time)==2){
-    calcPPA_STP_Tinterval(STP_track,time,x_density,time_interval,quadsegs)
+      result<-calcPPA_STP_Tinterval(STP_track,time,x_density,time_interval,quadsegs)
     }else{
-    calcPPA_STP_Track(STP_track,x_density)
+    result<-calcPPA_STP_Track(STP_track,x_density)
     }
+  if(!isS4(result)){
+  warning('No PPA calculated. Maximum speed might be to low or time is equal to time of a
+          space-time point in which case the PPA is a point. Returning NA')
+    } else {
+      if (point_uncertainty>0){
+        result<-gBuffer(result,width=point_uncertainty)
+      }
+      }
+
+return(result)
 
 }
 
@@ -106,7 +121,7 @@ calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250, time
 # @author Mark ten Vregelaar
 # @importFrom rgeos gBuffer gIntersection gUnaryUnion
 #
-calc_PPA <- function(STP,t,points=NULL,qs=12){
+calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0){
 
 
   # If there are no points provided, find the two points before and after t.
@@ -144,6 +159,12 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   startpoint <- STP@sp[p1,]
   endpoint <- STP@sp[p2,]
   # calculate and return the PPA, the intersection of the two buffers
+  if(t==STP@endTime[p1] & point_uncertainty>0){
+    return(gBuffer(startpoint,width = point_uncertainty))
+  }
+  if(t==STP@endTime[p2] & point_uncertainty>0){
+    return(gBuffer(endpoint,width = point_uncertainty))
+  }
   PPA <- tryCatch(
     {
       if (t1>0 & t2 >0){
