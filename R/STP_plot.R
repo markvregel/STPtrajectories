@@ -73,7 +73,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_unc
   n <- length(STP_track)
 
   #create list of times for which PPAS need to be calculated
-  times<-seq(STP_track@endTime[[1]],STP_track@endTime[[n]]-time_interval*0.01,(time_interval*60))
+  times<-seq(STP_track@endTime[[1]],STP_track@endTime[[n]],(time_interval*60))
 
   #calculate PPAS
   PPAS<-lapply(times, function(x) {

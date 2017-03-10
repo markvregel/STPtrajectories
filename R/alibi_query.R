@@ -39,8 +39,8 @@ alibi_STP <- function(STP1,STP2){
 #' Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function
 #' @param STP_track1 STP_track1
 #' @param STP_track2 STP_track2
-#' @param stop_if_true logigal:Stop if intersection is found or not. Default=TRUE
-#' @return If TRUE returns vector space-time point of intersecting STPs
+#' @param stop_if_true logigal:Stop if intersection is found. Default=TRUE
+#' @return If TRUE returns vector space-time point of intersecting STPs. IF no intersection is found returns FALSE
 #' @author Mark ten Vregelaar
 #' @references - 	Kuijpers, B., Grimson, R., & Othman, W. (2011).
 #' An analytic solution to the alibi query in the space-time prisms model for moving object data.

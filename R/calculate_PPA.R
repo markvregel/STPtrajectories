@@ -99,7 +99,7 @@ calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250,
     result<-calcPPA_STP_Track(STP_track,x_density)
     }
   if(!isS4(result)){
-  warning('No PPA calculated. Maximum speed might be to low or time is equal to time of a
+  warning('Could not calculate PPA. Maximum speed might be to low or time is equal to time of a
           space-time point in which case the PPA is a point. Returning NA')
     } else {
       if (point_uncertainty>0){
