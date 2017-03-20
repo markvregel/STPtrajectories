@@ -11,10 +11,10 @@ alibi_query(STP_track1, STP_track2, stop_if_true = TRUE)
 
 \item{STP_track2}{STP_track2}
 
-\item{stop_if_true}{logigal:Stop if intersection is found or not. Default=TRUE}
+\item{stop_if_true}{logigal:Stop if intersection is found. Default=TRUE}
 }
 \value{
-If TRUE returns vector space-time point of intersecting STPs
+If TRUE returns vector space-time point of intersecting STPs. IF no intersection is found returns FALSE
 }
 \description{
 CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!

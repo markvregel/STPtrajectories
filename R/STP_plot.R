@@ -4,12 +4,14 @@
 #' @description This function visualizes STPs in 3D.
 #' @param STP_track A STP_Track.
 #' @param time_interval the time interval in minutes.Determines the amount of PPAs that are plotted.
-#' @param zfactor realtive size of z axis compared to x and y axis.
+#' @param zfactor realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data
 #' @param color of STP(s).
 #' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.
 #' @param point_uncertainty uncertainty of space-time points. Default = 0.
 #' @importFrom  rgl translate3d extrude3d shade3d
 #' @author Mark ten Vregelaar
+#' @return If no zfactor is provided, method returns calculated zfactor.
+#' Otherwise mehtod returns NULL
 #' @export
 #' @examples
 #'library(spacetime)
@@ -61,9 +63,17 @@
 #'library(rgl)
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
-STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_uncertainty=0){
-  #   Return:
-  #         No return
+STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_uncertainty=0){
+  # if no zfacor provided calculate one based on longets spatial axis
+  if(is.null(zfactor)){
+    bbox<-bbox(STP_track)
+    spatial_diff<-max(bbox[1,2]-bbox[1,1],bbox[2,2]-bbox[2,1])
+    time_diff<-difftime(STP_track@endTime[[n]],STP_track@endTime[[1]],units = 'mins')
+    zfac<-spatial_diff/as.numeric(time_diff)
+    print(zfactor)}
+
+
+
   # if no st provided. start at first time of STP_track
   if (is.null(st)){
     st <- STP_track@endTime[[1]]
@@ -85,7 +95,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_unc
 
 
   # nummerical list of times for which PPAS were calculated
-  t<-as.numeric(difftime(times,st,units = 'min'))*zfactor
+  t<-as.numeric(difftime(times,st,units = 'min'))*zfac
   t<-t[NAs]
 
   # plot PPAS in loop lapplay---------------------------------------------------------------
@@ -93,7 +103,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_unc
     x<-PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords[,1]
     y<-PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords[,2]
     tryCatch({
-      shade3d(translate3d(extrude3d(x,y,thickness = time_interval*zfactor),0,0,t[i]),col=col,add=TRUE)
+      shade3d(translate3d(extrude3d(x,y,thickness = time_interval*zfac),0,0,t[i]),col=col,add=TRUE)
 
     },error=function(cond) {
       message("Whoops could not plot polygon")
@@ -103,6 +113,9 @@ STP_plot<-function(STP_track,time_interval,zfactor=1,col='red',st=NULL,point_unc
       return(NA)})
 
   }
+
+  if(is.null(zfactor)){
+return(zfac)}
 
 }
 

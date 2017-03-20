@@ -86,7 +86,7 @@
 calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250,
                           time_interval= 1, quadsegs=12,point_uncertainty=0){
   if (!is.null(points)){
-    result<-STP_track <-STP_track[points,'']
+    STP_track <-STP_track[points,'']
   }
    if (length(time)==1){
      result<-calc_PPA(STP_track,time[1],qs=quadsegs,point_uncertainty=point_uncertainty)
@@ -103,6 +103,7 @@ calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250,
           space-time point in which case the PPA is a point. Returning NA')
     } else {
       if (point_uncertainty>0){
+
         result<-gBuffer(result,width=point_uncertainty)
       }
       }
