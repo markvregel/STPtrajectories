@@ -349,15 +349,12 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
           calc_PPA(STP_track, x,qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords
         }
         else{
-          print(x)
           NULL# <---- now NULL, alternatives may be faster
         }})
     # test if a space-time point is within the time range
     TF_point <- lapply(STP_track@endTime, FUN=function(x) in_time_range(x,time_range))
     if (T %in% TF_point){
       ## CASE: only one space-time point in time range
-      print('only one space-time point in time-range')
-
       # get times before and after original space-time point
       subset1<-which(PPAtimes<STP_track@endTime[which(TF_point==T)])
       subset2<-which(PPAtimes>STP_track@endTime[which(TF_point==T)])
@@ -376,7 +373,6 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
 
     else{
       ## CASE: no point in between time range
-      print('no point in between time range. One point might equal to t1 or t2')
       #calculate PPA by calculating convexhull of PPAS
       PPApoly <- chull_poly(PPAs,crs)
       # return final PPA
@@ -384,7 +380,6 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     }}
   else{
     # CASE: at least one complete STP in time-range
-    print('at least one complete STP in time-range')
     # calculate PPA the complete part of STP_track
     comp_STP_track<-STP_track[1:length(STP_track),paste(time_range[1],time_range[2],sep="::")]
     PPA_track <- calcPPA_STP_Track(comp_STP_track,x_density)
@@ -412,8 +407,8 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
       PPApoly2<-chull_poly(PPAS2,crs)
     }
     if(is.null(PPApoly1) & is.null(PPApoly2)){
+      ## CASE: a complete track
       # no parts before and after complete track
-      print('just a full track')
       return(PPA_track)
     }
     else{
