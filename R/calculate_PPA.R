@@ -17,6 +17,7 @@
 #' Only used where paramter time_interval is relavant.
 #' @param point_uncertainty uncertainty of space-time points. Default = 0.
 #' @return The Potential Path Area as SpatialPolygons.
+#' If time is equal to time of a space-time point and point_uncetainty = 0, method returns NA because there is no PPA
 #' @author Mark ten Vregelaar
 #' @importMethodsFrom raster bind
 #' @importFrom rgeos gBuffer gIntersection gUnaryUnion
@@ -83,34 +84,44 @@
 #'# plot results
 #'plot(STP_track1,type='b')
 #'plot(PPA,add=TRUE)
-calculate_PPA <- function(STP_track, time=NULL, points=NULL, x_density=250,
-                          time_interval= 1, quadsegs=12,point_uncertainty=0){
-  if (!is.null(points)){
-    STP_track <-STP_track[points,'']
-  }
-   if (length(time)==1){
-     result<-calc_PPA(STP_track,time[1],qs=quadsegs,point_uncertainty=point_uncertainty)
-     if (time[1] %in% STP_track@endTime & isS4(result)){
-       return(result)
-     }
-    } else if (length(time)==2){
-      result<-calcPPA_STP_Tinterval(STP_track,time,x_density,time_interval,quadsegs)
-    }else{
-    result<-calcPPA_STP_Track(STP_track,x_density)
+calculate_PPA <-
+  function(STP_track, time = NULL, points = NULL, x_density = 250,
+           time_interval = 1, quadsegs = 12, point_uncertainty = 0) {
+    if (!is.null(points)) {
+      STP_track <- STP_track[points, '']
     }
-  if(!isS4(result)){
-  warning('Could not calculate PPA. Maximum speed might be to low or time is equal to time of a
-          space-time point in which case the PPA is a point. Returning NA')
-    } else {
-      if (point_uncertainty>0){
-
-        result<-gBuffer(result,width=point_uncertainty)
+    if (length(time) == 1) {
+      result <-  calc_PPA(STP_track, time[1], qs = quadsegs,point_uncertainty = point_uncertainty)
+      if (is.null(result)) {
+        stop('Could not calculate PPA. Maximum speed might be to low.')}
+      return(result)
       }
-      }
+     else if (length(time) == 2) {
+       if (time[2]<=time[1]){
+         stop("error in time. time[2] is smaller or eaual to time[1]")
+       }
+       else if(time_interval > difftime(time[2],time[1],units = 'mins')){
+         stop("error in time. time interval is bigger than time difference between space-time points")
 
-return(result)
+       }else{
+         result <- calcPPA_STP_Tinterval(STP_track, time, x_density, time_interval, quadsegs)
+       }
+       }
+         else{
+      result <- calcPPA_STP_Track(STP_track, x_density)
+    }
+    if (!isS4(result)) {
+      warning(
+        'Could not calculate PPA. Maximum speed might be to low or time is equal to time of a
+        space-time point in which case the PPA is a point. Returning NA'
+      )
+    } else if (point_uncertainty > 0) {
+      result <- gBuffer(result, width = point_uncertainty)
+    }
 
-}
+    return(result)
+
+  }
 
 # @title calc_PPA
 # @description This function calcualtes the Potential Path Area(PPA) for a given moment in time.
@@ -330,7 +341,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
   if (sum(points==T)<2){
     # times for which the PPA needs to be calculated
     PPAtimes<-seq(t1+(time_interval*60),t2,(time_interval*60))
-    if ((t1+(time_interval*60))<=t2){
+
       # calculate PPA for times in PPAtimes
       PPAs<-lapply(PPAtimes, function(x) {
 
@@ -340,13 +351,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
         else{
           print(x)
           NULL# <---- now NULL, alternatives may be faster
-        }})}
-
-    else{
-      # never happens. seq error
-      print('(t1 + timeinterval) > t2')
-      return(NULL)
-    }
+        }})
     # test if a space-time point is within the time range
     TF_point <- lapply(STP_track@endTime, FUN=function(x) in_time_range(x,time_range))
     if (T %in% TF_point){

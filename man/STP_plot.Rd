@@ -4,7 +4,7 @@
 \alias{STP_plot}
 \title{STP_plot}
 \usage{
-STP_plot(STP_track, time_interval, zfactor = 1, col = "red", st = NULL,
+STP_plot(STP_track, time_interval, zfactor = NULL, col = "red", st = NULL,
   point_uncertainty = 0)
 }
 \arguments{
@@ -12,13 +12,17 @@ STP_plot(STP_track, time_interval, zfactor = 1, col = "red", st = NULL,
 
 \item{time_interval}{the time interval in minutes.Determines the amount of PPAs that are plotted.}
 
-\item{zfactor}{realtive size of z axis compared to x and y axis.}
+\item{zfactor}{realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data}
 
 \item{st}{start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.}
 
 \item{point_uncertainty}{uncertainty of space-time points. Default = 0.}
 
 \item{color}{of STP(s).}
+}
+\value{
+If no zfactor is provided, method returns calculated zfactor.
+Otherwise mehtod returns NULL
 }
 \description{
 This function visualizes STPs in 3D.

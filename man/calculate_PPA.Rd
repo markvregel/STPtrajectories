@@ -31,6 +31,7 @@ Only used where paramter time_interval is relavant.}
 }
 \value{
 The Potential Path Area as SpatialPolygons.
+If time is equal to time of a space-time point and point_uncetainty = 0, method returns NA because there is no PPA
 }
 \description{
 Function for calculating the Potetial Path Area(PPA) of a STP_track.

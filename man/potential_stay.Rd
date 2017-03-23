@@ -4,8 +4,73 @@
 \alias{potential_stay}
 \title{potential_stay}
 \usage{
-potential_stay(STP_track, spgeom, time_interval)
+potential_stay(STP_track, spgeom)
 }
 \arguments{
-\item{spgeom}{point,line or polygon object}
+\item{STP_track}{A STP_Track}
+
+\item{spgeom}{A Spatialpoints,Spatiallines or Spatialpolygons object}
+}
+\value{
+A named list with  the potential stay time intervals for STPs that intersect with the spatial geometry
+}
+\examples{
+library(rgeos)
+library(sp)
+library(spacetime)
+library(rgl)
+#--------------------------create a STP_Track--------------------------
+# set time
+t1 <- as.POSIXct(strptime("01/01/2017 12:00:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
+t2 <- as.POSIXct(strptime("01/01/2017 14:00:00", "\%m/\%d/\%Y \%H:\%M:\%S"))
+n<-5
+time<-seq(t1,t2,length.out = n)
+# set coordinates
+x=c(1,3,4,7,6)
+y=c(2,5,8,9,11)
+
+n = length(x)
+crs_NL = CRS("+init=epsg:28992")
+
+# create class STIDF
+stidf1 = STIDF(SpatialPoints(cbind(x,y),crs_NL), time, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+
+# Track-class {trajectories}
+my_track1<-Track(stidf1)
+
+# set maximum speed
+v1<-getVmaxtrack(my_track1)*1.5
+
+# STP_track class
+STP_track1<-STP_Track(my_track1,v1)
+#--------------------------create a spatialpolygon--------------------------
+point_xy<-c(5,9)
+lake <- readWKT("POLYGON((1 8,1.3 8.5,1.7 8.7,2 9,2.5 9.2,3 9,3.5 8.5,3.2 7.7,2.5 7.5,2 7.5,1 8))")
+lake@proj4string<-crs_NL
+
+# calculate the potential stay time for point
+intervals <- potential_stay(STP_track = STP_track1,spgeom = lake)
+
+# calculate the time the individual could have been at the lake
+lake_time <- intervals$`STP 2`[2]-intervals$`STP 2`[1]+intervals$`STP 3`[2]-intervals$`STP 3`[1]
+print(paste('Total time individual could have been at the lake is ',round(lake_time,2),'minutes'))
+
+# visulise in 2D
+plot(STP_track1,type='b')
+PPA<-calculate_PPA(STP_track1)
+plot(PPA,add=T)
+plot(lake,add=T,border= 'blue',lwd=2)
+
+# visulise in 3D
+open3d()
+zfac<-STP_plot(STP_track1,time_interval = 0.6)
+
+axes_STP_plot(c(STP_track1@endTime[1],STP_track1@endTime[n]),z_factor = zfac,n_ticks_z = 5,n_ticks_xy = 4)
+
+x<-lake@polygons[[1]]@Polygons[[1]]@coords[,1]
+y<-lake@polygons[[1]]@Polygons[[1]]@coords[,2]
+z<-difftime(STP_track1@endTime[n],STP_track1@endTime[1],units = 'mins')*zfac
+
+shade3d(translate3d(
+ extrude3d(x,y,thickness = z),0,0,0),col='blue',add=TRUE)
 }

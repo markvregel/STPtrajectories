@@ -70,7 +70,9 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_
     spatial_diff<-max(bbox[1,2]-bbox[1,1],bbox[2,2]-bbox[2,1])
     time_diff<-difftime(STP_track@endTime[[n]],STP_track@endTime[[1]],units = 'mins')
     zfac<-spatial_diff/as.numeric(time_diff)
-    print(zfactor)}
+  }else{
+  zfac<-zfactor
+}
 
 
 
@@ -109,8 +111,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_
       message("Whoops could not plot polygon")
       message("Here's the original error message:")
       message(cond)
-      # Choose a return value in case of error
-      return(NA)})
+      })
 
   }
 
