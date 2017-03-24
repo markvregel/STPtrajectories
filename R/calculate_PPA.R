@@ -85,17 +85,20 @@
 #'plot(STP_track1,type='b')
 #'plot(PPA,add=TRUE)
 calculate_PPA <-
-  function(STP_track, time = NULL, points = NULL, x_density = 250,
-           time_interval = 1, quadsegs = 12, point_uncertainty = 0) {
+  function(STP_track, time = NULL, points = NULL, x_density = 250, time_interval = 1,
+           quadsegs = 12, point_uncertainty = 0,activity_time=0) {
+    activity_time<-activity_time*60# time in seconds
     if (!is.null(points)) {
       STP_track <- STP_track[points, '']
     }
     if (length(time) == 1) {
-      result <-  calc_PPA(STP_track, time[1], qs = quadsegs,point_uncertainty = point_uncertainty)
+      result <-  calc_PPA(STP_track, time[1], qs = quadsegs,point_uncertainty = point_uncertainty,
+                          activity_time=activity_time)
       if (is.null(result)) {
         stop('Could not calculate PPA. Maximum speed might be to low.')}
-      return(result)
-      }
+      if (time[1] %in% STP_track@endTime & isS4(result)){
+        return(result)
+      }}
      else if (length(time) == 2) {
        if (time[2]<=time[1]){
          stop("error in time. time[2] is smaller or eaual to time[1]")
@@ -104,11 +107,12 @@ calculate_PPA <-
          stop("error in time. time interval is bigger than time difference between space-time points")
 
        }else{
-         result <- calcPPA_STP_Tinterval(STP_track, time, x_density, time_interval, quadsegs)
+         result <- calcPPA_STP_Tinterval(STP_track, time, x_density, time_interval, quadsegs,activity_time)
        }
        }
          else{
-      result <- calcPPA_STP_Track(STP_track, x_density)
+           print('a')
+      result <- calcPPA_STP_Track(STP_track, x_density,activity_time)
     }
     if (!isS4(result)) {
       warning(
@@ -163,7 +167,6 @@ calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0,activity_time=0
 
   ## if  activity_time>0 change time budgets accordingly
   if (activity_time>0){
-    activity_time<-activity_time*60# time in seconds
     # calculate halfway time
     tdiff<-abs(difftime(STP@endTime[p1],STP@endTime[p2],units = 'secs'))
     middle_time <- STP@endTime[p1]+tdiff/2
@@ -235,7 +238,7 @@ calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0,activity_time=0
 # @return The Potential Path Area of the STP as SpatialPolygons
 # @author Mark ten Vregelaar
 #
-calcPPA_STP <- function(STP,x_density=250){
+calcPPA_STP <- function(STP,x_density=250,activity_time=0){
   # get coordiantes of STP
   x1<-STP@sp@coords[1,1]
   y1<-STP@sp@coords[1,2]
@@ -250,10 +253,9 @@ calcPPA_STP <- function(STP,x_density=250){
   x2<-x2-xmin
   y2<-y2-ymin
 
-
   ## calculate the x coordinates for which the y coordinates need to be calculated
   # total time budget
-  t=as.numeric(difftime(STP@endTime[2],STP@endTime[1],units = 'secs'))
+  t=as.numeric(difftime(STP@endTime[2],STP@endTime[1],units = 'secs'))-activity_time
   v<-STP@connections$vmax
   # total distance that can be covered
   s=v*t
@@ -309,7 +311,7 @@ calcPPA_STP <- function(STP,x_density=250){
 # @return The Potential Path Area of the STP as SpatialPolygons
 # @author Mark ten Vregelaar
 # @importMethodsFrom raster bind
-calcPPA_STP_Track <- function(STP_track,x_density=250){
+calcPPA_STP_Track <- function(STP_track,x_density=250,activity_time=0){
   if (length(STP_track)==2){
 
     return(calcPPA_STP(STP_track,x_density))
@@ -321,7 +323,7 @@ calcPPA_STP_Track <- function(STP_track,x_density=250){
 
     STP<-STP_track[p1:(p1+1),'']
     # calculate PPA of STP
-    calcPPA_STP(STP,x_density)
+    calcPPA_STP(STP,x_density,activity_time)
   })
 
   #convertlist of PPA to one SpatialPolygons
@@ -349,7 +351,7 @@ calcPPA_STP_Track <- function(STP_track,x_density=250){
 # @return The Potential Path Area for the time range as SpatialPolygons
 # @author Mark ten Vregelaar
 #'
-calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, quadsegs){# can be done smarter
+calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, quadsegs,activity_time=0){# can be done smarter
 
   # define frequently used vaiables
   crs<- STP_track@sp@proj4string
@@ -368,7 +370,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
       PPAs<-lapply(PPAtimes, function(x) {
 
         if (!(x %in% STP_track@endTime)){
-          calc_PPA(STP_track, x,qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords
+          calc_PPA(STP_track, x,qs = quadsegs,activity_time=activity_time)@polygons[[1]]@Polygons[[1]]@coords
         }
         else{
           NULL# <---- now NULL, alternatives may be faster
@@ -404,7 +406,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     # CASE: at least one complete STP in time-range
     # calculate PPA the complete part of STP_track
     comp_STP_track<-STP_track[1:length(STP_track),paste(time_range[1],time_range[2],sep="::")]
-    PPA_track <- calcPPA_STP_Track(comp_STP_track,x_density)
+    PPA_track <- calcPPA_STP_Track(comp_STP_track,x_density,activity_time = activity_time)
     # initialize PPAs to NULL
     PPApoly1<-NULL
     PPApoly2<-NULL
@@ -413,7 +415,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     #lapplay for calculating PPAs for different moments in time
     if ((t1+(time_interval*60))<(comp_STP_track@endTime[1])){
       PPAS1<-lapply(seq(t1+(time_interval*60),comp_STP_track@endTime[1]-(time_interval*60),(time_interval*60)), function(x) {
-        calc_PPA(STP_track, x, qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords
+        calc_PPA(STP_track, x, qs = quadsegs,activity_time=activity_time)@polygons[[1]]@Polygons[[1]]@coords
       }
       )
       # convexhull of points
@@ -424,7 +426,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     #lapplay for calculating PPAs for different moments in time
     if ((tail(comp_STP_track@endTime,n=1)+(time_interval*60))<t2){
       PPAS2<-lapply(seq(tail(comp_STP_track@endTime,n=1)+(time_interval*60),t2,(time_interval*60)), function(x)
-        calc_PPA(STP_track, x, qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords)
+        calc_PPA(STP_track, x, qs = quadsegs,activity_time=activity_time)@polygons[[1]]@Polygons[[1]]@coords)
       # convexhull of points
       PPApoly2<-chull_poly(PPAS2,crs)
     }

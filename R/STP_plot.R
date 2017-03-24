@@ -63,7 +63,8 @@
 #'library(rgl)
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
-STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_uncertainty=0){
+STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',
+                   st=NULL,point_uncertainty=0,activity_time=0){
 
   # get length of STP_track
   n <- length(STP_track)
@@ -92,7 +93,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_
 
   #calculate PPAS
   PPAS<-lapply(times, function(x) {
-    calculate_PPA(STP_track, x,point_uncertainty=point_uncertainty)
+    calculate_PPA(STP_track, x,point_uncertainty=point_uncertainty,activity_time=activity_time)
   })
   # remove NAs for PPAs that could not be calculated
   NAs<-!is.na(PPAS)
@@ -105,8 +106,9 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_
 
   # plot PPAS in loop lapplay---------------------------------------------------------------
   for (i in 1:length(PPAS)){
-    x<-PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords[,1]
-    y<-PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords[,2]
+    coords<-unique(PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords)
+    x<-coords[,1]
+    y<-coords[,2]
     tryCatch({
       shade3d(translate3d(extrude3d(x,y,thickness = time_interval*zfac),0,0,t[i]),col=col,add=TRUE)
 
