@@ -64,6 +64,10 @@
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
 STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_uncertainty=0){
+
+  # get length of STP_track
+  n <- length(STP_track)
+
   # if no zfacor provided calculate one based on longets spatial axis
   if(is.null(zfactor)){
     bbox<-bbox(STP_track)
@@ -81,8 +85,7 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',st=NULL,point_
     st <- STP_track@endTime[[1]]
   }
 
-  # get length of STP_track
-  n <- length(STP_track)
+
 
   #create list of times for which PPAS need to be calculated
   times<-seq(STP_track@endTime[[1]],STP_track@endTime[[n]],(time_interval*60))

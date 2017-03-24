@@ -133,8 +133,7 @@ calculate_PPA <-
 # @author Mark ten Vregelaar
 # @importFrom rgeos gBuffer gIntersection gUnaryUnion
 #
-calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0){
-
+calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0,activity_time=0){
 
   # If there are no points provided, find the two points before and after t.
   if (is.null(points)){
@@ -161,6 +160,29 @@ calc_PPA <- function(STP,t,points=NULL,qs=12,point_uncertainty=0){
   # get time difference of the time between the two points and t
   t1 = abs(difftime(STP@endTime[p1],t,units = 'secs'))
   t2 = abs(difftime(STP@endTime[p2],t,units = 'secs'))
+
+  ## if  activity_time>0 change time budgets accordingly
+  if (activity_time>0){
+    activity_time<-activity_time*60# time in seconds
+    # calculate halfway time
+    tdiff<-abs(difftime(STP@endTime[p1],STP@endTime[p2],units = 'secs'))
+    middle_time <- STP@endTime[p1]+tdiff/2
+    # calculate period of no movement; the time of activity
+    no_movement<-c(middle_time-activity_time/2,middle_time+activity_time/2)
+    # recalculate time budgets
+    if (t>=no_movement[1] & t<=no_movement[2]){
+      time_budget<-difftime(STP@endTime[p2],middle_time,units = 'secs')
+      t1 <-time_budget-activity_time/2
+      t2 <- time_budget-activity_time/2
+    }else{
+      if(t<no_movement[1]){
+        t2<- t2-activity_time
+
+      }else{
+        if(t>no_movement[2])
+          t1<- t1-activity_time
+
+      }}}
 
   #calculate the maximum travel dictance strating form the two points in m
   # now assuming meters as unit for the projecition<-----------------------------------------
