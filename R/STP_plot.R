@@ -7,8 +7,8 @@
 #' @param zfactor realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data
 #' @param color of STP(s).
 #' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.
-#' @param point_uncertainty uncertainty of space-time points. Default = 0.
 #' @importFrom  rgl translate3d extrude3d shade3d
+#' @importFrom geometry convhulln
 #' @author Mark ten Vregelaar
 #' @return If no zfactor is provided, method returns calculated zfactor.
 #' Otherwise mehtod returns NULL
@@ -63,11 +63,12 @@
 #'library(rgl)
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
-STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',
-                   st=NULL,point_uncertainty=0,activity_time=0){
-
+STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
+                   st=NULL,alpha=1){
   # get length of STP_track
   n <- length(STP_track)
+  # time_interval in seconds
+  time_interval<- time_interval*60
 
   # if no zfacor provided calculate one based on longets spatial axis
   if(is.null(zfactor)){
@@ -79,47 +80,117 @@ STP_plot<-function(STP_track,time_interval,zfactor=NULL,col='red',
   zfac<-zfactor
 }
 
-
-
   # if no st provided. start at first time of STP_track
   if (is.null(st)){
     st <- STP_track@endTime[[1]]
   }
+  # time uncertainty in secs
+  tu <- STP_track@rough_sets$time_uncertainty*60
+
+  # loop through STPS
+  for(i in 1:(length(STP_track)-1)){
+
+  # create list of times for which PPAS need to be calculated
+  times<-seq(STP_track@endTime[i],STP_track@endTime[i+1],(time_interval))
+
+  # calculate PPAS
+  suppressWarnings(PPAS<-lapply(times, function(x) {
+    calculate_PPA(STP_track, x,quadsegs = 12)
+  }))
+
+  # create times and ppas tip and top of STP_track in case of time uncertainty
+  if(tu>0 & (i==1 | i==(length(STP_track)-1))){
+    STP1 <- STP_track[i:(i+1),'']
+    STP1@rough_sets$time_uncertainty <- 0
+    STP1@endTime[1] <- STP1@endTime[1] - tu
+    STP1@endTime[2] <- STP1@endTime[2] + tu
 
 
+    if(i==1){
+      times1 <- seq(STP_track@endTime[1]-tu,STP_track@endTime[1]-time_interval,(time_interval))
+    }else{
+      times1 <- seq(STP_track@endTime[n]+time_interval,STP_track@endTime[n]+tu,(time_interval))
+    }
 
-  #create list of times for which PPAS need to be calculated
-  times<-seq(STP_track@endTime[[1]],STP_track@endTime[[n]],(time_interval*60))
-
-  #calculate PPAS
-  PPAS<-lapply(times, function(x) {
-    calculate_PPA(STP_track, x,point_uncertainty=point_uncertainty,activity_time=activity_time)
-  })
+    suppressWarnings(PPAS1<-lapply(times1, function(x) {
+      calculate_PPA(STP1, x)
+    }))
+    if(i==1){
+      PPAS<-c(PPAS1,PPAS)
+      times<-c(times1,times)}
+    else{
+      PPAS<-c(PPAS,PPAS1)
+      times<-c(times,times1)
+      }
+}
   # remove NAs for PPAs that could not be calculated
   NAs<-!is.na(PPAS)
+
   PPAS<-PPAS[NAs]
 
-
   # nummerical list of times for which PPAS were calculated
-  t<-as.numeric(difftime(times,st,units = 'min'))*zfac
-  t<-t[NAs]
+  tdif<-as.numeric(difftime(times,st,units = 'min'))*zfac
+  t<-tdif[NAs]
 
-  # plot PPAS in loop lapplay---------------------------------------------------------------
-  for (i in 1:length(PPAS)){
-    coords<-unique(PPAS[[i]]@polygons[[1]]@Polygons[[1]]@coords)
+  # get xyz coordinates for plotting
+  STP_coords<-lapply(1:length(PPAS),function(j){
+    coords<-PPAS[[j]]@polygons[[1]]@Polygons[[1]]@coords
     x<-coords[,1]
     y<-coords[,2]
-    tryCatch({
-      shade3d(translate3d(extrude3d(x,y,thickness = time_interval*zfac),0,0,t[i]),col=col,add=TRUE)
+    z<-rep(t[j],length(x))
+    list(x=x,y=y,z=z)
+    })
+  STP_coords<-do.call(Map,c(c,STP_coords))
+  xx<-STP_coords$x
+  yy<-STP_coords$y
+  zz<-STP_coords$z
 
-    },error=function(cond) {
-      message("Whoops could not plot polygon")
-      message("Here's the original error message:")
-      message(cond)
-      })
+  # add orignal space-time points to STP. Only if no PPA could be calculated
+  if(NAs[1]==F){
+    xx<-c(STP_track@sp[i]@coords[1],xx)
+    yy<-c(STP_track@sp[i]@coords[2],yy)
+    zz<-c(tdif[1],zz)
+  }# also if location uncertainty is 0 and time of space-time points is not in times
+  if(tail(NAs,1)==F | STP_track@rough_sets$location_uncertainty==0){
+    xx<-c(xx,STP_track@sp[(i+1)]@coords[1])
+    yy<-c(yy,STP_track@sp[(i+1)]@coords[2])
+    zz<-c(zz,(as.numeric(difftime(STP_track@endTime[(i+1)],st,units = 'min'))+tu/60)*zfac)
+  }
+  # matrix with all coordinates
+  stp3d<-matrix(c(xx,yy,zz),ncol=3)
+
+  at <- STP_track@connections$activity_time[i]*60
+  # if activity time bigger than 0 take convexhull of stp parts separately
+  if (at>0){
+    # calculate halfway time
+    tdiff<-abs(difftime(STP_track@endTime[i],STP_track@endTime[(i+1)],units = 'secs'))
+    middle_time <- STP_track@endTime[i]+tdiff/2
+
+    b1 <- as.numeric(difftime(middle_time-at/2,st,units='mins')*zfac)
+    b2 <- as.numeric(difftime(middle_time+at/2,st,units='mins')*zfac)
+
+    # split inot upper cone bottum cone and zone of no movement(part2)
+    part1<-stp3d[stp3d[,3]<=(b1+time_interval/60*zfac),]
+    part2<-stp3d[stp3d[,3]>=b1 & stp3d[,3]<=b2,]
+    part3<-stp3d[stp3d[,3]>=(b2-time_interval/60*zfac),]
+
+    # get convexhull
+    conv1<-t(convhulln(part1))
+    conv2<-t(convhulln(part2))
+    conv3<-t(convhulln(part3))
+    # plot the three parts
+    rgl.triangles(part1[conv1,1],part1[conv1,2],part1[conv1,3],col=col,alpha=alpha)
+    rgl.triangles(part2[conv2,1],part2[conv2,2],part2[conv2,3],col=col,alpha=alpha)
+    rgl.triangles(part3[conv3,1],part3[conv3,2],part3[conv3,3],col=col,alpha=alpha)
+  }else{
+    # take convexhull and plot STP
+
+    conv<-t(convhulln(stp3d))
+    rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
 
   }
-
+  }
+  # return zfactor is it was not provided
   if(is.null(zfactor)){
 return(zfac)}
 

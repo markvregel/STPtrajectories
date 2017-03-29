@@ -88,9 +88,16 @@ potential_stay <- function(STP_track, spgeom) {
         }
 
           for (j in 1:length(intersection)){
-        # calcualte minimal distance to each intersection for each point
-        dist1 <- gDistance(STP@sp[1],intersection[j])
-        dist2 <- gDistance(STP@sp[2],intersection[j])
+        # calcualte minimal distance to reach intersection for both points
+        dist1 <- gDistance(STP@sp[1],intersection[j])-STP@rough_sets$location_uncertainty
+        dist2 <- gDistance(STP@sp[2],intersection[j])-STP@rough_sets$location_uncertainty
+
+        if( dist1 < 0)
+          dist1<- 0
+        if (dist2 < 0)
+          dist2<- 0
+
+        print(c(dist1,dist2))
         # calculate the time the individual can reach closest point of spgeom from  space-time point
         time1 <- STP@endTime[1]+dist1/STP@connections$vmax
         time2 <- STP@endTime[2]-dist2/STP@connections$vmax

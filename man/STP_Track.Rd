@@ -4,10 +4,23 @@
 \alias{STP_Track}
 \title{STP_Track class}
 \usage{
-STP_Track(track, vmax)
+STP_Track(track, vmax, activity_time = 0, location_uncertainty = 0,
+  time_uncertainty = 0)
 }
 \arguments{
-\item{Track}{object of class  \link{Track}}
+\item{vmax}{The maxium speed of the individual. Must be large enough to reach the next point.
+Either one vmax for entire track or a vector with the max speed for each segment.}
+
+\item{activity_time}{Time of an activity in minutes. During this the time the individual cannot move.
+Either one activity_time for entire track or a vector with the activity_time for each segment.}
+
+\item{location_uncertainty}{Uncertainty of the location of the space-time points in meters.
+Either one location_uncertainty for entire track or a vector with the location_uncertainty for each point.}
+
+\item{time_uncertainty}{Uncertainty of the time of the space-time points in minutes.
+Either one time_uncertainty for entire track or a vector with the time_uncertainty for each point.}
+
+\item{Track}{Object of class  \link{Track}}
 }
 \description{
 A class to represent Space-Time Prism(STP) trajecories.

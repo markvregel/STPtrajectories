@@ -3,7 +3,15 @@
 #' These are trajectories with a maximum speed for each segment.
 #' The maximum speed is added to the connections slot of class \link{Track}.
 #' The STP_Track can also combined in classes \link{Tracks} and \link{TracksColletion} of the trajecories package
-#' @param Track object of class  \link{Track}
+#' @param Track  Object of class  \link{Track}
+#' @param vmax  The maxium speed of the individual. Must be large enough to reach the next point.
+#' Either one vmax for entire track or a vector with the max speed for each segment.
+#' @param activity_time  Time of an activity in minutes. During this the time the individual cannot move.
+#' Either one activity_time for entire track or a vector with the activity_time for each segment.
+#' @param location_uncertainty Uncertainty of the location of the space-time points in meters.
+#' Either one location_uncertainty for entire track or a vector with the location_uncertainty for each point.
+#' @param time_uncertainty Uncertainty of the time of the space-time points in minutes.
+#' Either one time_uncertainty for entire track or a vector with the time_uncertainty for each point.
 #' @inheritSection trajectories::Track Slots of class "Track"
 #' @seealso rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 #' @examples
@@ -96,14 +104,18 @@
 STP_Track<-setClass(
   # Class for storing Space-time Prism trajecotries. These are trajecories with maximum speeds.
   "STP_Track",
-  contains = "Track",
+  contains = "Track",representation=representation(
+    rough_sets = "list"),
 
   validity = function(object) {
 
 
 
-    speedCheck<-object@connections$vmax>=object@connections$speed
+    #speedCheck<-object@connections$vmax>=object@connections$speed
+    n <- length(object)
+    time<-difftime(object@endTime[2:n],object@endTime[1:n-1],units = 'secs')-object@connections$activity_time*60
 
+    speedCheck<-object@connections$distance<=object@connections$vmax*time
 
     if((FALSE %in% speedCheck)) {
       return(paste0("The vmax for connection ",which(speedCheck %in% F),
@@ -119,12 +131,20 @@ STP_Track<-setClass(
   }
 )
 #'@export
-STP_Track = function(track,vmax) {
+STP_Track = function(track,vmax,activity_time=0,location_uncertainty=0, time_uncertainty=0) {
   # vmax distance unit projection/seconds
-  # degrees are converted to Great Circle distance in Trmeters and thus m/s
-  track@connections$vmax<- vmax
+  # degrees are converted to Great Circle distance in meters and thus m/s
+  track@connections$vmax <- vmax
+
+  track@connections$activity_time <- activity_time
+  # track@connections$location_uncertainty <- location_uncertainty
+  # track@connections$time_uncertainty <- time_uncertainty
+
+
   validObject(track)
-  new("STP_Track", track)
+  STP_track <- new("STP_Track", track)
+  STP_track@rough_sets<-list(location_uncertainty=location_uncertainty,time_uncertainty=time_uncertainty)
+  return(STP_track)
 }
 
 #
@@ -132,14 +152,22 @@ subs.STP_Track <- function(x, i, j, ..., drop = TRUE) {
   # Provide selection methods.
   # i selection of record index (spatial/temporal/spatio-temporal entities)
   # j selection of temporal entities (see syntax in package xts)
-  track<-Track(as(x, "STIDF")[i, j, ..., drop = drop])
+  track <- Track(as(x, "STIDF")[i, j, ..., drop = drop])
 
-  vmax<-x[['vmax']][x@endTime %in% track@endTime]
-  if (max(diff(which(x@endTime %in% track@endTime,TRUE)))>1){
-    warning('Some intermediate space-time points will be removed. If vmax values differ along the STP_track, the vmax values might change.
-            The maxmimum speed of a new line segments will depend on the first point of the segment')
+  new_time <- x@endTime %in% track@endTime
+  # get values that are not in track
+  vmax <- head(x[['vmax']][new_time],-1)
+  at <- head(x[['activity_time']][new_time],-1)
+  loc_error <- x@rough_sets$location_uncertainty
+  time_error <- x@rough_sets$time_uncertainty
+  # warning if intermediate space-time points are removed
+  if (max(diff(which(new_time,TRUE)))>1){
+    warning('Some intermediate space-time points will be removed.
+             If vmax values differ along the STP_track, the vmax values might change.
+             The maxmimum speed of a new line segments will depend on the first point of the segment.
+             This also applies to the activity time.')
   }
-  return(STP_Track(track,head(vmax,-1)))
+  return(STP_Track(track,vmax,at,loc_error,time_error))
 
 }
 

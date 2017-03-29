@@ -5,7 +5,7 @@
 \title{calculate_PPA}
 \usage{
 calculate_PPA(STP_track, time = NULL, points = NULL, x_density = 250,
-  time_interval = 1, quadsegs = 12, point_uncertainty = 0)
+  time_interval = 1, quadsegs = 12)
 }
 \arguments{
 \item{STP_track}{The STP_track for which the PPA needs to be calculated}
@@ -26,12 +26,10 @@ Default is every minute}
 
 \item{quadsegs}{Passed to buffer. Number of line segments to use to approximate a quarter circle.
 Only used where paramter time_interval is relavant.}
-
-\item{point_uncertainty}{uncertainty of space-time points. Default = 0.}
 }
 \value{
 The Potential Path Area as SpatialPolygons.
-If time is equal to time of a space-time point and point_uncetainty = 0, method returns NA because there is no PPA
+If time is equal to time of a space-time point and rough_sets (time and location uncertainty points) are 0, method returns NA because there is no PPA
 }
 \description{
 Function for calculating the Potetial Path Area(PPA) of a STP_track.

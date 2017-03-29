@@ -4,8 +4,8 @@
 \alias{STP_plot}
 \title{STP_plot}
 \usage{
-STP_plot(STP_track, time_interval, zfactor = NULL, col = "red", st = NULL,
-  point_uncertainty = 0)
+STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
+  st = NULL, alpha = 1)
 }
 \arguments{
 \item{STP_track}{A STP_Track.}
@@ -15,8 +15,6 @@ STP_plot(STP_track, time_interval, zfactor = NULL, col = "red", st = NULL,
 \item{zfactor}{realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data}
 
 \item{st}{start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.}
-
-\item{point_uncertainty}{uncertainty of space-time points. Default = 0.}
 
 \item{color}{of STP(s).}
 }
