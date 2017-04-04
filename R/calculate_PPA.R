@@ -1,8 +1,11 @@
 ## Functions for calculating the Potetial Path Area
 ## check correctness for acitivty time and roughsets and combinations
-#' @title calculate_PPA
+#' @title PPA
 #' @description Function for calculating the Potetial Path Area(PPA) of a STP_track.
 #' This function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
+#' The PPA for a specific moment in time is always based on the two points that before and after paramter time.
+#' If time is outside time range of track but within time uncerainty limits,
+#' method will return PPA based on the two closest points in time.
 #' @param STP_track The STP_track for which the PPA needs to be calculated
 #' @param time Time("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
 #' Use time = c(time1,time2) to calculate PPA for a time range. Default is NULL: calculate PPA for entire STP_track
@@ -53,51 +56,60 @@
 #'#------------------------------example 1------------------------------
 #'## PPA entire track
 #'#calculate PPA
-#'PPA<-calculate_PPA(STP_track1)
+#'PPA1<-PPA(STP_track1)
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=TRUE)
+#'plot(PPA1,add=TRUE)
 #'#------------------------------example 2------------------------------
 #'## PPA only using every second point
 #'# calculate PPA
-#'PPA<-calculate_PPA(STP_track1,points = seq(1,11,2))
+#'PPA2<-PPA(STP_track1,points = seq(1,11,2))
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=TRUE)
+#'plot(PPA2,add=TRUE)
 #'#------------------------------example 3------------------------------
 #'## PPA of a specfic moment in time
 #'# calculate PPA
 #'time <- strptime("01/01/2017 01:15:00", "%m/%d/%Y %H:%M:%S")
-#'PPA<-calculate_PPA(STP_track1,time = time)
+#'PPA3<-PPA(STP_track1,time = time)
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=TRUE)
+#'plot(PPA3,add=TRUE)
 #'#------------------------------example 4------------------------------
 #'## PPA for a time range
 #'# calculate PPA
 #'timerange1 <- c(t1,strptime("01/01/2017 02:15:00", "%m/%d/%Y %H:%M:%S"))
-#'PPA<-calculate_PPA(STP_track1,time = timerange1)
+#'PPA4<-PPA(STP_track1,time = timerange1)
 #'
 #'# plot results
 #'plot(STP_track1,type='b')
-#'plot(PPA,add=TRUE)
-calculate_PPA <-
+#'plot(PPA4,add=TRUE)
+PPA <-
   function(STP_track, time = NULL, points = NULL, x_density = 250, time_interval = 1,
            quadsegs = 12) {
+    tu<-STP_track@rough_sets$time_uncertainty*60
+
     if (!is.null(points)) {
       STP_track <- STP_track[points, '']
     }
     if (length(time) == 1) {
+      if(!in_time_range_incl(time[1],c(STP_track@endTime[1]-tu,tail(STP_track@endTime,1)+tu))){
+        stop('Could not calculate PPA. Time not in time range of STP_track')
+      }
+
       result <-  calc_PPA(STP_track, time[1], qs = quadsegs)
-      if (is.null(result)) {
-        stop('Could not calculate PPA. Maximum speed might be to low.')}
       if (time[1] %in% STP_track@endTime & isS4(result) & STP_track@rough_sets$time_uncertainty==0){
         return(result)
       }}
      else if (length(time) == 2) {
+       if(!in_time_range_incl(time[1],c(STP_track@endTime[1],tail(STP_track@endTime,1))) |
+          !in_time_range_incl(time[2],c(STP_track@endTime[1],tail(STP_track@endTime,1)))){
+         stop('Could not calculate PPA. Time not in time range of STP_track')
+       }
+
        if (time[2]<=time[1]){
          stop("error in time. time[2] is smaller or eaual to time[1]")
        }
@@ -136,17 +148,33 @@ calculate_PPA <-
 # @importFrom rgeos gBuffer gIntersection gUnaryUnion
 #
 calc_PPA <- function(STP,t,points=NULL,qs=12){
+  # time uncertainty in seconds
+  tu <- STP@rough_sets$time_uncertainty*60
   # If there are no points provided, find the two points before and after t.
   if (is.null(points)){
     i=1
     search=T
     while (i+1<=length(STP) & search){
-      if (t>=STP@endTime[i] & t<=STP@endTime[i+1]){
+      if (in_time_range_incl(t,c(STP@endTime[i],STP@endTime[i+1]))){
         p1=i
         p2=i+1
         search = F
       }
       i=i+1
+
+    }
+    if(is.null(points)){
+      n=length(STP)
+      if (t>=(STP@endTime[1]-tu) & t<=(STP@endTime[1])){
+        p1=1
+        p2=2
+      }else{
+        if(t<=(STP@endTime[n]+tu) & t>=(STP@endTime[n])){
+          p1=n-1
+          p2=n
+
+        }
+      }
 
     }
   }
@@ -155,6 +183,8 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
     p2 = points[2]
   }
 
+
+
   # maximum speed
   v = STP@connections$vmax[p1]
   # activity_time
@@ -162,7 +192,6 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   # location uncertainty
   lu <- STP@rough_sets$location_uncertainty
 
-  tu <- STP@rough_sets$time_uncertainty*60
 
   STP@endTime[p1]<-STP@endTime[p1]-tu
   STP@endTime[p2]<-STP@endTime[p2]+tu
@@ -170,6 +199,7 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   # get time difference of the time between the two points and t
   t1 = abs(difftime(STP@endTime[p1],t,units = 'secs'))
   t2 = abs(difftime(STP@endTime[p2],t,units = 'secs'))
+
 
   ## if  at>0 change time budgets accordingly
   if (at>0){
@@ -259,6 +289,9 @@ calcPPA_STP <- function(STP,x_density=250){
   x2<-x2-xmin
   y2<-y2-ymin
 
+  # time_uncertainty in seconds
+  tu<-STP@rough_sets$time_uncertainty*60
+
   # activity time in seconds
   at<-STP@connections$activity_time*60
 
@@ -267,7 +300,7 @@ calcPPA_STP <- function(STP,x_density=250){
 
   ## calculate the x coordinates for which the y coordinates need to be calculated
   # total time budget
-  t=as.numeric(difftime(STP@endTime[2],STP@endTime[1],units = 'secs'))-at
+  t=as.numeric(difftime(STP@endTime[2]+tu,STP@endTime[1]-tu,units = 'secs'))-at
 
   # total distance that can be covered
   s=v*t
@@ -467,6 +500,20 @@ in_time_range <- function(time, time_range){
   stopifnot(length(time_range) == 2L)
 
   time>time_range[1] & time<time_range[2]
+
+}
+
+# @title in_time_range_incl
+# @description Function that checks if the time is within the time_range
+# @param time time (POSIXct): time
+# @param time_range time_range(two POSIXct): the time range
+#
+# @return True or False(logical): True if time within time_Range
+in_time_range_incl <- function(time, time_range){
+
+  stopifnot(length(time_range) == 2L)
+
+  time>=time_range[1] & time<=time_range[2]
 
 }
 

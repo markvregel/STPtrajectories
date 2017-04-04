@@ -95,7 +95,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
 
   # calculate PPAS
   suppressWarnings(PPAS<-lapply(times, function(x) {
-    calculate_PPA(STP_track, x,quadsegs = 12)
+    PPA(STP_track, x,quadsegs = 12)
   }))
 
   # create times and ppas tip and top of STP_track in case of time uncertainty

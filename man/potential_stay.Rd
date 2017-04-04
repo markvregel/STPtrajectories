@@ -57,8 +57,8 @@ print(paste('Total time individual could have been at the lake is ',round(lake_t
 
 # visulise in 2D
 plot(STP_track1,type='b')
-PPA<-calculate_PPA(STP_track1)
-plot(PPA,add=T)
+PPA1<-PPA(STP_track1)
+plot(PPA1,add=T)
 plot(lake,add=T,border= 'blue',lwd=2)
 
 # visulise in 3D

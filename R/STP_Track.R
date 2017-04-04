@@ -110,10 +110,11 @@ STP_Track<-setClass(
   validity = function(object) {
 
 
-
+    # time uncertainty in seconds
+    tu <- object@rough_sets$time_uncertainty*60
     #speedCheck<-object@connections$vmax>=object@connections$speed
     n <- length(object)
-    time<-difftime(object@endTime[2:n],object@endTime[1:n-1],units = 'secs')-object@connections$activity_time*60
+    time<-difftime((object@endTime[2:n])+tu,(object@endTime[1:n-1])-tu,units = 'secs')-object@connections$activity_time*60
 
     speedCheck<-object@connections$distance<=object@connections$vmax*time
 
@@ -140,10 +141,9 @@ STP_Track = function(track,vmax,activity_time=0,location_uncertainty=0, time_unc
   # track@connections$location_uncertainty <- location_uncertainty
   # track@connections$time_uncertainty <- time_uncertainty
 
-
   validObject(track)
-  STP_track <- new("STP_Track", track)
-  STP_track@rough_sets<-list(location_uncertainty=location_uncertainty,time_uncertainty=time_uncertainty)
+  STP_track <- new("STP_Track", track,rough_sets = list(location_uncertainty=location_uncertainty,time_uncertainty=time_uncertainty))
+
   return(STP_track)
 }
 

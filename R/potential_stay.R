@@ -50,8 +50,8 @@
 #'
 #'# visulise in 2D
 #'plot(STP_track1,type='b')
-#'PPA<-calculate_PPA(STP_track1)
-#'plot(PPA,add=T)
+#'PPA1<-PPA(STP_track1)
+#'plot(PPA1,add=T)
 #'plot(lake,add=T,border= 'blue',lwd=2)
 #'
 #'# visulise in 3D
@@ -68,7 +68,7 @@
 #'  extrude3d(x,y,thickness = z),0,0,0),col='blue',add=TRUE)
 potential_stay <- function(STP_track, spgeom) {
   # calculate PPA
-  PPA_track <- calculate_PPA(STP_track)
+  PPA_track <- PPA(STP_track)
   # initialise intervals to store time intervals of potential stay
   intervals <- c()
   # check if there is a potential stay time
@@ -76,11 +76,11 @@ potential_stay <- function(STP_track, spgeom) {
     # check which STPs intersect with the spgeom
     for (i in 1:length(STP_track@connections[, 1])) {
       STP <- STP_track[i:(i + 1), '']
-      PPA <- calculate_PPA(STP)
+      PPA_STP <- PPA(STP)
 
-      if (gIntersects(PPA, spgeom)) {
+      if (gIntersects(PPA_STP, spgeom)) {
         # if STP intersect with spgeom get intersection
-        intersection <- disaggregate(gIntersection(PPA,spgeom))
+        intersection <- disaggregate(gIntersection(PPA_STP,spgeom))
         if (length(intersection)>1){
           # if intersection results in more than 1 polygon or line then there are multiple time intervals
           warning(paste("double interval for STP", i))
