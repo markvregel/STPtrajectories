@@ -66,8 +66,8 @@ STP_track_bear1@connections$vmax<-vmax_bear1
 STP_track_bear2@connections$vmax<-vmax_bear2
 
 # calculate Potential Path Area (PPA)
-PPA_bear1 <- calculate_PPA(STP_track_bear1)
-PPA_bear2 <- calculate_PPA(STP_track_bear2)
+PPA_bear1 <- PPA(STP_track_bear1)
+PPA_bear2 <- PPA(STP_track_bear2)
 
 
 # plot results
@@ -87,7 +87,7 @@ alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = T)# not always correc
 ## ----STP_plot, webgl=TRUE------------------------------------------------
 zfac<- 50 # aspect ration between sptatial axes and time axis
 t_int <- 0.8 # determines how many PPAs are used to visualise STPs.
-
+open3d()
 STP_plot(STP_track_bear1,time_interval = t_int,zfactor = zfac)
 STP_plot(STP_track_bear2,time_interval = t_int,zfactor = zfac,st = STP_track_bear1@endTime[1],col = 'blue')
 

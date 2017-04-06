@@ -12,7 +12,14 @@ potential_stay(STP_track, spgeom)
 \item{spgeom}{A Spatialpoints,Spatiallines or Spatialpolygons object}
 }
 \value{
-A named list with  the potential stay time intervals for STPs that intersect with the spatial geometry
+A named list with  the potential stay time intervals for each STP that intersects with the spatial geometry
+}
+\description{
+Function that calculates the time intervals at which the individual could have been at spgeom,
+ a spatial location as a point line or polygon. The total potential stay time may not been equal to the sum of the intervals.
+ This applies to multiple potential stay times and if the track has time uncertainty.
+ If the track has time unceratinty the method calculates the max potential stay for each STP,
+ which may result in a time overlap in the returned potential stay time intervals.
 }
 \examples{
 library(rgeos)
@@ -52,13 +59,13 @@ lake@proj4string<-crs_NL
 intervals <- potential_stay(STP_track = STP_track1,spgeom = lake)
 
 # calculate the time the individual could have been at the lake
-lake_time <- intervals$`STP 2`[2]-intervals$`STP 2`[1]+intervals$`STP 3`[2]-intervals$`STP 3`[1]
+lake_time <- sum(sapply(intervals, function(STP){difftime(STP[2],STP[1],units = 'mins')}))
 print(paste('Total time individual could have been at the lake is ',round(lake_time,2),'minutes'))
 
 # visulise in 2D
 plot(STP_track1,type='b')
-PPA1<-PPA(STP_track1)
-plot(PPA1,add=T)
+PPA_track<-PPA(STP_track1)
+plot(PPA_track,add=T)
 plot(lake,add=T,border= 'blue',lwd=2)
 
 # visulise in 3D

@@ -70,11 +70,14 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   # time_interval in seconds
   time_interval<- time_interval*60
 
+  # time uncertainty in secs
+  tu <- STP_track@rough_sets$time_uncertainty*60
+
   # if no zfacor provided calculate one based on longets spatial axis
   if(is.null(zfactor)){
     bbox<-bbox(STP_track)
     spatial_diff<-max(bbox[1,2]-bbox[1,1],bbox[2,2]-bbox[2,1])
-    time_diff<-difftime(STP_track@endTime[[n]],STP_track@endTime[[1]],units = 'mins')
+    time_diff<-difftime(STP_track@endTime[[n]]+tu,STP_track@endTime[[1]]-tu,units = 'mins')
     zfac<-spatial_diff/as.numeric(time_diff)
   }else{
   zfac<-zfactor
@@ -82,10 +85,9 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
 
   # if no st provided. start at first time of STP_track
   if (is.null(st)){
-    st <- STP_track@endTime[[1]]
+    st <- STP_track@endTime[[1]]-tu
   }
-  # time uncertainty in secs
-  tu <- STP_track@rough_sets$time_uncertainty*60
+
 
   # loop through STPS
   for(i in 1:(length(STP_track)-1)){
@@ -113,7 +115,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     }
 
     suppressWarnings(PPAS1<-lapply(times1, function(x) {
-      calculate_PPA(STP1, x)
+      PPA(STP1, x)
     }))
     if(i==1){
       PPAS<-c(PPAS1,PPAS)
@@ -144,16 +146,15 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   xx<-STP_coords$x
   yy<-STP_coords$y
   zz<-STP_coords$z
-
   # add orignal space-time points to STP. Only if no PPA could be calculated
   if(NAs[1]==F){
-    xx<-c(STP_track@sp[i]@coords[1],xx)
-    yy<-c(STP_track@sp[i]@coords[2],yy)
+    xx<-c(STP_track@sp@coords[i,1],xx)
+    yy<-c(STP_track@sp@coords[i,2],yy)
     zz<-c(tdif[1],zz)
   }# also if location uncertainty is 0 and time of space-time points is not in times
   if(tail(NAs,1)==F | STP_track@rough_sets$location_uncertainty==0){
-    xx<-c(xx,STP_track@sp[(i+1)]@coords[1])
-    yy<-c(yy,STP_track@sp[(i+1)]@coords[2])
+    xx<-c(xx,STP_track@sp@coords[(i+1),1])
+    yy<-c(yy,STP_track@sp@coords[(i+1),2])
     zz<-c(zz,(as.numeric(difftime(STP_track@endTime[(i+1)],st,units = 'min'))+tu/60)*zfac)
   }
   # matrix with all coordinates

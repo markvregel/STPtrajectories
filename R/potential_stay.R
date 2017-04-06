@@ -1,10 +1,14 @@
 # potential stay
 
 #' @title potential_stay
-#' @description
+#' @description Function that calculates the time intervals at which the individual could have been at spgeom,
+#'  a spatial location as a point line or polygon. The total potential stay time may not been equal to the sum of the intervals.
+#'  This applies to multiple potential stay times and if the track has time uncertainty.
+#'  If the track has time unceratinty the method calculates the max potential stay for each STP,
+#'  which may result in a time overlap in the returned potential stay time intervals.
 #' @param STP_track A STP_Track
 #' @param spgeom A Spatialpoints,Spatiallines or Spatialpolygons object
-#' @return A named list with  the potential stay time intervals for STPs that intersect with the spatial geometry
+#' @return A named list with  the potential stay time intervals for each STP that intersects with the spatial geometry
 #' @export
 #' @importFrom rgeos gIntersects gDistance
 #' @examples
@@ -45,13 +49,13 @@
 #'intervals <- potential_stay(STP_track = STP_track1,spgeom = lake)
 #'
 #'# calculate the time the individual could have been at the lake
-#'lake_time <- intervals$`STP 2`[2]-intervals$`STP 2`[1]+intervals$`STP 3`[2]-intervals$`STP 3`[1]
+#'lake_time <- sum(sapply(intervals, function(STP){difftime(STP[2],STP[1],units = 'mins')}))
 #'print(paste('Total time individual could have been at the lake is ',round(lake_time,2),'minutes'))
 #'
 #'# visulise in 2D
 #'plot(STP_track1,type='b')
-#'PPA1<-PPA(STP_track1)
-#'plot(PPA1,add=T)
+#'PPA_track<-PPA(STP_track1)
+#'plot(PPA_track,add=T)
 #'plot(lake,add=T,border= 'blue',lwd=2)
 #'
 #'# visulise in 3D
@@ -73,6 +77,10 @@ potential_stay <- function(STP_track, spgeom) {
   intervals <- c()
   # check if there is a potential stay time
   if (gIntersects(PPA_track, spgeom)) {
+    # time uncertainty in seconds
+    tu <- STP_track@rough_sets$time_uncertainty*60
+
+
     # check which STPs intersect with the spgeom
     for (i in 1:length(STP_track@connections[, 1])) {
       STP <- STP_track[i:(i + 1), '']
@@ -80,12 +88,18 @@ potential_stay <- function(STP_track, spgeom) {
 
       if (gIntersects(PPA_STP, spgeom)) {
         # if STP intersect with spgeom get intersection
-        intersection <- disaggregate(gIntersection(PPA_STP,spgeom))
+        intersection <- gIntersection(PPA_STP,spgeom)
+
+        if(!is(intersection,"SpatialPoints")){
+          intersection <- disaggregate(intersection)
+
         if (length(intersection)>1){
           # if intersection results in more than 1 polygon or line then there are multiple time intervals
-          warning(paste("double interval for STP", i))
+          warning(paste0("More than one interval for STP " , i,
+                        ". Total potential stay time at input location may not be equal to
+                        the sum of time difference between the intervals"))
 
-        }
+        }}
 
           for (j in 1:length(intersection)){
         # calcualte minimal distance to reach intersection for both points
@@ -97,10 +111,34 @@ potential_stay <- function(STP_track, spgeom) {
         if (dist2 < 0)
           dist2<- 0
 
-        print(c(dist1,dist2))
         # calculate the time the individual can reach closest point of spgeom from  space-time point
-        time1 <- STP@endTime[1]+dist1/STP@connections$vmax
-        time2 <- STP@endTime[2]-dist2/STP@connections$vmax
+        time1 <- STP@endTime[1]-tu+dist1/STP@connections$vmax
+        time2 <- STP@endTime[2]+tu-dist2/STP@connections$vmax
+
+        # activity time in seconds
+        at <- STP@connections$activity_time*60
+
+        ## if  at>0 change time interval accordingly
+        if (at>0){
+          # calculate halfway time
+          tdiff<-difftime(STP@endTime[2],STP@endTime[1],units = 'secs')
+          middle_time <- STP@endTime[1]+tdiff/2
+          # calculate period of no movement; the time of activity
+          no_movement<<-c(middle_time-at/2,middle_time+at/2)
+          # update time intervals
+          # if (time1>=no_movement[1] & time2<=no_movement[2]) no need to change time intervals
+            if(time2<no_movement[2]& time1<no_movement[1]){
+              time2 <- time2 - at
+            }
+              if(time1>no_movement[1]& time2>no_movement[2]){
+                time1 <- time1 + at
+            }}
+
+
+
+
+
+
         # list intervals and add stp number as name
         STP_int <- list(c(time1,time2))
         names(STP_int)<-paste("STP",i)
@@ -113,7 +151,8 @@ potential_stay <- function(STP_track, spgeom) {
   else{
     warning('No potential stay time. Indivivdual cannot reach spgeom.')
   }
-  return(intervals)
+  # return list sorted on time
+  return(intervals[order(sapply(intervals,'[[',1))])
 }
 
 
