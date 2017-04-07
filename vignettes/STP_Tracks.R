@@ -105,7 +105,7 @@ axes3d(c('x','y'),xlab='x')
 axis3d('z',at=tickval,labels = timesval,cex=0.8)
 box3d()
 
-## ------------------------------------------------------------------------
+## ---- webgl=TRUE---------------------------------------------------------
 bear1_sub <-STP_track_bear1[1:20,'2017-01-01 12:00:00 CET::2017-01-01 13:00:00 CET']
 
 road<-readWKT("LINESTRING(2800 500,3200 200,4000 50,5000 100,6000 500,7000 1000,7700 1200)")
@@ -141,13 +141,13 @@ shade3d(translate3d(
 
 ## ---- webgl=TRUE---------------------------------------------------------
 # higher maximum speed 
-vmax<- vmax_bear1*1.6
+vmax<- bear1_sub@connections$vmax[1]*1.6
 # taking into account uncerainty about location and measurement time at control points.
 open3d()
 bear1_sub_rough<-STP_Track(bear1_sub,vmax,0,location_uncertainty = 2,time_uncertainty = 1)
 
-zf<-STP_plot(bear1_sub,alpha = 0.4,col='darkcyan')
+zf<-STP_plot(bear1_sub_rough,alpha = 0.4,col='darkcyan')
 STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
-axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[4]+1*60),z_factor = zf)
+axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
 
 
