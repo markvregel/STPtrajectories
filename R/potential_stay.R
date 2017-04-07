@@ -103,8 +103,8 @@ potential_stay <- function(STP_track, spgeom) {
 
           for (j in 1:length(intersection)){
         # calcualte minimal distance to reach intersection for both points
-        dist1 <- gDistance(STP@sp[1],intersection[j])-STP@rough_sets$location_uncertainty
-        dist2 <- gDistance(STP@sp[2],intersection[j])-STP@rough_sets$location_uncertainty
+        dist1 <- gDistance(STP@sp[1,],intersection[j])-STP@rough_sets$location_uncertainty
+        dist2 <- gDistance(STP@sp[2,],intersection[j])-STP@rough_sets$location_uncertainty
 
         if( dist1 < 0)
           dist1<- 0

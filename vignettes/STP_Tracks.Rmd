@@ -53,6 +53,7 @@ library(sp)
 library(spacetime)
 library(knitr)
 library(rgl)
+library(rgeos)
 knit_hooks$set(webgl = hook_webgl)
 ```
 
@@ -162,6 +163,60 @@ timesval<-seq(time[1],time[2],length.out = 5)
 axes3d(c('x','y'),xlab='x')
 axis3d('z',at=tickval,labels = timesval,cex=0.8)
 box3d()
+```
+
+## potential stay time
+Somone saw a bear on a road somewhere between 12 and 1 o'clock. The code below shows how you can 
+check if bear 1 was that bear and when he could have been at the road
+
+```{r, webgl=TRUE}
+bear1_sub <-STP_track_bear1[1:20,'2017-01-01 12:00:00 CET::2017-01-01 13:00:00 CET']
+
+road<-readWKT("LINESTRING(2800 500,3200 200,4000 50,5000 100,6000 500,7000 1000,7700 1200)")
+
+road@proj4string<-crs_NL
+road_buffer<-gBuffer(road,width = 4)
+
+intervals<-potential_stay(STP_track_bear1,road_buffer)
+intervals
+
+# calculate the time the individual could have been at the lake
+road_time <- sum(sapply(intervals, function(int){difftime(int[2],int[1],units = 'mins')}))
+
+print(paste('Total time bear 1 could have been on the road is ',round(road_time,2),'minutes'))
+
+
+# visulise in 3D
+open3d()
+zfac<-STP_plot(bear1_sub,time_interval = 0.6)
+
+axes_STP_plot(c(bear1_sub@endTime[1],tail(bear1_sub@endTime,1)),z_factor = zfac,n_ticks_z = 5,n_ticks_xy = 4)
+
+
+x<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,1]
+y<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,2]
+z<-difftime(tail(bear1_sub@endTime,1),bear1_sub@endTime[1],units = 'mins')*zfac
+
+
+shade3d(translate3d(
+  extrude3d(x,y,thickness = z),0,0,0),col='black',add=TRUE)
+
+
+```
+
+
+## create rough space-time prisms
+```{r, webgl=TRUE}
+# higher maximum speed 
+vmax<- bear1_sub@connections$vmax[1]*1.6
+# taking into account uncerainty about location and measurement time at control points.
+open3d()
+bear1_sub_rough<-STP_Track(bear1_sub,vmax,0,location_uncertainty = 2,time_uncertainty = 1)
+
+zf<-STP_plot(bear1_sub_rough,alpha = 0.4,col='darkcyan')
+STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
+axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
+
 ```
 
 See also:

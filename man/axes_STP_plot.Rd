@@ -4,16 +4,23 @@
 \alias{axes_STP_plot}
 \title{axes_STP_plot}
 \usage{
-axes_STP_plot(minmaxT, z_factor, n_ticks_xy = 3, n_ticks_z = 5)
+axes_STP_plot(minmaxT, z_factor, n_ticks_xy = 3, n_ticks_z = 5,
+  expand = 1.1)
 }
 \arguments{
-\item{minmaxT}{a vector of length 2 with two "POSIXct" or"POSIXt" values}
+\item{minmaxT}{a vector of length 2 with two "POSIXct" or"POSIXt" values.
+The first and last moment in time of plotted tracks.
+Make sure first time is equal to the tracks that starts as first.
+Also take into account time_uncetrainty.}
 
 \item{z_factor}{the z facfor used in the plot}
 
 \item{n_ticks_xy}{number of ticks used for the x and y axes}
 
 \item{n_ticks_z}{number of ticks used for the z axes}
+
+\item{expand}{for expanding the bbox. passed to rgl.bbox.
+If not all z/time tick are visisble, increase expand value.}
 }
 \description{
 This function adds a bbox with axis to a STP_plot

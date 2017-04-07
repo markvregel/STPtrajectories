@@ -94,37 +94,40 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
 
   # create list of times for which PPAS need to be calculated
   times<-seq(STP_track@endTime[i],STP_track@endTime[i+1],(time_interval))
-
+  if(tail(times,1)!=STP_track@endTime[i+1]){
+  times<-c(times,STP_track@endTime[i+1])
+    }
   # calculate PPAS
   suppressWarnings(PPAS<-lapply(times, function(x) {
     PPA(STP_track, x,quadsegs = 12)
   }))
 
-  # create times and ppas tip and top of STP_track in case of time uncertainty
-  if(tu>0 & (i==1 | i==(length(STP_track)-1))){
+  #create times and ppas tip and top of STP_track in case of time uncertainty
+  if(tu>0 & (i==1 | i==n-1)){
     STP1 <- STP_track[i:(i+1),'']
     STP1@rough_sets$time_uncertainty <- 0
-    STP1@endTime[1] <- STP1@endTime[1] - tu
-    STP1@endTime[2] <- STP1@endTime[2] + tu
-
-
+    STP1@endTime<-c(STP1@endTime[1] - tu,STP1@endTime[2] + tu)
     if(i==1){
-      times1 <- seq(STP_track@endTime[1]-tu,STP_track@endTime[1]-time_interval,(time_interval))
-    }else{
-      times1 <- seq(STP_track@endTime[n]+time_interval,STP_track@endTime[n]+tu,(time_interval))
-    }
-
-    suppressWarnings(PPAS1<-lapply(times1, function(x) {
-      PPA(STP1, x)
-    }))
-    if(i==1){
+      times1 <- seq(STP_track@endTime[1]-tu,STP_track@endTime[1]-time_interval,time_interval)
+      suppressWarnings(PPAS1<-lapply(times1, function(x) {
+        PPA(STP1, x)
+      }))
       PPAS<-c(PPAS1,PPAS)
       times<-c(times1,times)}
-    else{
-      PPAS<-c(PPAS,PPAS1)
-      times<-c(times,times1)
-      }
-}
+  if(i==(n-1)){
+
+    times2 <- seq(STP_track@endTime[n]+time_interval,STP_track@endTime[n]+tu,time_interval)
+    suppressWarnings(PPAS2<-lapply(times2, function(x) {
+      PPA(STP1, x)
+    }))
+    PPAS<-c(PPAS,PPAS2)
+    times<-c(times,times2)
+
+
+  }
+  }
+
+
   # remove NAs for PPAs that could not be calculated
   NAs<-!is.na(PPAS)
 
@@ -146,16 +149,19 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   xx<-STP_coords$x
   yy<-STP_coords$y
   zz<-STP_coords$z
-  # add orignal space-time points to STP. Only if no PPA could be calculated
-  if(NAs[1]==F){
+
+  # add orignal space-time points to STP if there is no point uncerainty.
+  # results in overlappint STPs if tu >0
+  if(STP_track@rough_sets$location_uncertainty==0){
+    # add lower control point
     xx<-c(STP_track@sp@coords[i,1],xx)
     yy<-c(STP_track@sp@coords[i,2],yy)
-    zz<-c(tdif[1],zz)
-  }# also if location uncertainty is 0 and time of space-time points is not in times
-  if(tail(NAs,1)==F | STP_track@rough_sets$location_uncertainty==0){
+    zz<-c((as.numeric(difftime((STP_track@endTime[(i)]-tu),st,units = 'min')))*zfac,zz)
+
+    # add upper control point
     xx<-c(xx,STP_track@sp@coords[(i+1),1])
     yy<-c(yy,STP_track@sp@coords[(i+1),2])
-    zz<-c(zz,(as.numeric(difftime(STP_track@endTime[(i+1)],st,units = 'min'))+tu/60)*zfac)
+    zz<-c(zz,(as.numeric(difftime((STP_track@endTime[(i+1)]+tu),st,units = 'min')))*zfac)
   }
   # matrix with all coordinates
   stp3d<-matrix(c(xx,yy,zz),ncol=3)
@@ -190,6 +196,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
 
   }
+
   }
   # return zfactor is it was not provided
   if(is.null(zfactor)){
@@ -199,22 +206,27 @@ return(zfac)}
 
 #' @title axes_STP_plot
 #' @description This function adds a bbox with axis to a STP_plot
-#' @param minmaxT a vector of length 2 with two "POSIXct" or"POSIXt" values
+#' @param minmaxT a vector of length 2 with two "POSIXct" or"POSIXt" values.
+#' The first and last moment in time of plotted tracks.
+#' Make sure first time is equal to the tracks that starts as first.
+#' Also take into account time_uncetrainty.
 #' @param z_factor the z facfor used in the plot
 #' @param n_ticks_xy number of ticks used for the x and y axes
 #' @param n_ticks_z number of ticks used for the z axes
+#' @param expand for expanding the bbox. passed to rgl.bbox.
+#' If not all z/time tick are visisble, increase expand value.
 #' @importFrom rgl rgl.bbox axes3d
 #' @author Mark ten Vregelaar
 #' @export
 #'
-axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5){
+axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5,expand=1.1){
   tdif<-as.numeric(difftime(minmaxT[2],minmaxT[1],units = 'mins'))
   tickval<-seq(0,tdif*z_factor,length.out = n_ticks_z)
-
   timesval<-seq(minmaxT[1],minmaxT[2],length.out = n_ticks_z)
 
+
   rgl.bbox(xat = 0,yat = 0,zat = tickval, zlab = timesval,color = c("black", "black"), emission = "#252526",
-           specular = "#636363", shininess = 5, alpha = 0.8,expand=1.02,ylab = 'y)',xlab = 'x')
+           specular = "#636363", shininess = 5, alpha = 0.8,expand=expand,ylab = 'y)',xlab = 'x')
   axes3d(c('x--', 'x+-', 'y--', 'y+-'),nticks = n_ticks_xy)
 
 }
