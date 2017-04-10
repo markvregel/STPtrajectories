@@ -24,7 +24,6 @@
 #' @author Mark ten Vregelaar
 #' @importMethodsFrom raster bind
 #' @importFrom rgeos gBuffer gIntersection gUnaryUnion
-#' @importFrom rgeos gBuffer gIntersection gUnaryUnion
 #' @import plyr rgdal
 #' @export
 #' @examples

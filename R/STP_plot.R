@@ -79,6 +79,11 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     spatial_diff<-max(bbox[1,2]-bbox[1,1],bbox[2,2]-bbox[2,1])
     time_diff<-difftime(STP_track@endTime[[n]]+tu,STP_track@endTime[[1]]-tu,units = 'mins')
     zfac<-spatial_diff/as.numeric(time_diff)
+
+    if (zfac==0){
+      stop('could not calculate z factor because first and last point have same location.
+           retry with value for zfactor paramter')
+    }
   }else{
   zfac<-zfactor
 }
@@ -86,6 +91,11 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   # if no st provided. start at first time of STP_track
   if (is.null(st)){
     st <- STP_track@endTime[[1]]-tu
+  }else{
+    if (length(st)!=1){
+      stop('startime is not valid. st should have length 1')
+
+    }
   }
 
 
@@ -96,7 +106,8 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   times<-seq(STP_track@endTime[i],STP_track@endTime[i+1],(time_interval))
   if(tail(times,1)!=STP_track@endTime[i+1]){
   times<-c(times,STP_track@endTime[i+1])
-    }
+  }
+
   # calculate PPAS
   suppressWarnings(PPAS<-lapply(times, function(x) {
     PPA(STP_track, x,quadsegs = 12)
@@ -163,6 +174,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     yy<-c(yy,STP_track@sp@coords[(i+1),2])
     zz<-c(zz,(as.numeric(difftime((STP_track@endTime[(i+1)]+tu),st,units = 'min')))*zfac)
   }
+
   # matrix with all coordinates
   stp3d<-matrix(c(xx,yy,zz),ncol=3)
 

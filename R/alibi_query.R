@@ -1,34 +1,3 @@
-
-alibi_STP <- function(STP1,STP2){
-
-
-  ts<-c(STP1@endTime[1],STP1@endTime[2],STP2@endTime[1],STP2@endTime[2])
-  tmin<-min(ts)
-  ts<-abs(as.numeric(difftime(tmin,ts,units = 'secs')))#<--------------------------
-  t1<-ts[1];t2<-ts[2];t3<-ts[3];t4<-ts[4]
-
-  x1 <- STP1@sp@coords[1,1]
-  x2 <- STP1@sp@coords[2,1]
-
-  y1 <- STP1@sp@coords[1,2]
-  y2 <- STP1@sp@coords[2,2]
-
-  v1 <- STP1@connections$vmax
-
-  x3 <- STP2@sp@coords[1,1]
-  x4 <- STP2@sp@coords[2,1]
-
-  y3 <- STP2@sp@coords[1,2]
-  y4 <- STP2@sp@coords[2,2]
-
-  v2 <- STP2@connections$vmax
-   #print(c(t1,t2,t3,t4))
-   #print(c(t1, x1, y1, t2, x2, y2, v1))
-   #print(c(t3, x3, y3, t4, x4, y4,v2))
-  return(alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
-}
-
-
 #' @title alibi_query
 #' @description CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!
 #' This function tests wether there was a possible meeting between two individuals or other moving objects.
@@ -46,6 +15,7 @@ alibi_STP <- function(STP1,STP2){
 #' An analytic solution to the alibi query in the space-time prisms model for moving object data.
 #' International Journal of Geographical Information Science, 25(2), 293-322.
 #' @importFrom lubridate interval int_overlaps
+#' @importFrom rgeos gConvexHull
 #' @export
 #' @examples
 #'library(spacetime)
@@ -82,8 +52,12 @@ alibi_STP <- function(STP1,STP2){
 #'
 #'## the alibi query
 #'alibi_query(STP_track1,STP_track2)
-alibi_query<-function(STP_track1,STP_track2,stop_if_true=TRUE){
-  #print(class(deparse(substitute(STP_track1))))
+alibi_query<-function(STP_track1,STP_track2,stop_if_true=TRUE,return_PIA=FALSE,time_interval=1){
+
+  # no rough_sets for alibi query
+  STP_track1<-zero_rough_sets(STP_track1)
+  STP_track2<-zero_rough_sets(STP_track2)
+
   Switch<-F
 # determine 1st and 2nd STP_track to improve processing time
 if (length(STP_track1)!=length(STP_track2)){
@@ -110,7 +84,7 @@ if (length(STP_track1)!=length(STP_track2)){
 
   track2_int<-interval(min(track2@endTime),max(track2@endTime))
   Trues<-c()
-#apply alibi query to segments is same time interval
+#apply alibi query to segments in same time interval
 for (i in 1:(length(track1)-1)){
   stp1_int<-interval(track1@endTime[i],track1@endTime[i+1])
   if(int_overlaps(stp1_int,track2_int)){
@@ -123,6 +97,7 @@ for (i in 1:(length(track1)-1)){
         result<-alibi_STP(STP1,STP2)
 
         if (result){
+
           if(Switch){
             STPs<-c(j,i)
           }else{
@@ -131,9 +106,14 @@ for (i in 1:(length(track1)-1)){
           message(c(TRUE, paste(': possibe intersection for STPs/connections ',STPs[1],'and',STPs[2])))
           points<-list('a'=STPs[1]:(STPs[1]+1),
             'b'=STPs[2]:(STPs[2]+1))
-          names(points)<-c(deparse(substitute(STP_track1)),deparse(substitute(STP_track2)))
+
+          names(points)<-c('STP_track1','STP_track2')
+          if (return_PIA){
+            # calculate PIA and time-interval meeting
+            time_PIA<-calc_PIA(STP1,STP2,time_interval)
+            points<-c(points,time_PIA)}
           if(stop_if_true){
-          return(points)
+            return(points)
           }else{
             Trues <- c(Trues,list(points))
           }
@@ -151,6 +131,112 @@ if (length(Trues)>0){
 }
 
 
+alibi_STP <- function(STP1,STP2){
 
 
+  ts<-c(STP1@endTime[1],STP1@endTime[2],STP2@endTime[1],STP2@endTime[2])
+  tmin<-min(ts)
+  ts<-abs(as.numeric(difftime(tmin,ts,units = 'secs')))#<--------------------------
+  t1<-ts[1];t2<-ts[2];t3<-ts[3];t4<-ts[4]
+
+  x1 <- STP1@sp@coords[1,1]
+  x2 <- STP1@sp@coords[2,1]
+
+  y1 <- STP1@sp@coords[1,2]
+  y2 <- STP1@sp@coords[2,2]
+
+  v1 <- STP1@connections$vmax
+
+  x3 <- STP2@sp@coords[1,1]
+  x4 <- STP2@sp@coords[2,1]
+
+  y3 <- STP2@sp@coords[1,2]
+  y4 <- STP2@sp@coords[2,2]
+
+  v2 <- STP2@connections$vmax
+
+  return(alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
+}
+
+calc_PIA<-function(STP1,STP2,time_interval){
+
+  # calculate potential PIA
+  PPA1<-PPA(STP1)
+  PPA2<-PPA(STP2)
+  PPIA<-gIntersection(PPA1,PPA2)
+
+  # Calculate time interval for which meeting is possible
+  STP1_time<-potential_stay(STP1,PPIA)[[1]]
+  STP2_time<- potential_stay(STP2,PPIA)[[1]]
+
+
+  if(STP1_time[1]>STP2_time[1]){
+    st <- STP1_time[1]
+  }else{
+    st <- STP2_time[1]
+  }
+
+  if(STP1_time[2]<STP2_time[2]){
+    et <- STP1_time[2]
+  }else{
+    et <- STP2_time[2]
+  }
+  # remove sure time control points not in time because cannot calculate PPA for the control points
+  if(et == STP1@endTime[2] | et == STP2@endTime[2] ){
+    et<-et-time_interval
+  }
+
+  if(st == STP1@endTime[1] | st == STP2@endTime[1] ){
+    st<-st+time_interval
+  }
+
+  times<-seq(st,et,time_interval)# times for which will be tested if intersection is possible
+  PIAs<-c()
+  t1_unknown=T
+  for (i in 1:length(times)){
+    t <- times[i]
+
+
+    PPA_STP1<-PPA(STP1,t)
+    PPA_STP2<-PPA(STP2,t)
+
+
+    if(gIntersects(PPA_STP1,PPA_STP2)){
+      if(t1_unknown){
+        t1i<-i
+        t1_unknown=FALSE}
+
+      PIA<-gIntersection(PPA_STP1,PPA_STP2)
+      PIAs<-c(PIAs,PIA)
+
+    }
+  }
+
+
+
+  t1<-times[t1i]
+  t2<- times[t1i+length(PIAs)-1]
+  if (is.null(PIAs)){
+    return(list("False positive by alibi query. No meeting possible"))
+  }else{
+  PIA_polygons<-do.call(bind,PIAs)
+  PIA<-gConvexHull(PIA_polygons)
+  # if case 1: control point in PIA, adjust t1 and t2
+  if(gIntersects(STP1@sp[1,],PIA) | gIntersects(STP2@sp[1,],PIA)){
+    t1<-t1-time_interval
+    print('a')
+    }
+
+  if(gIntersects(STP1@sp[2,],PIA) | gIntersects(STP2@sp[2,],PIA)){
+    print('b')
+    t2<-t2+time_interval}
+
+  return(list(meeting_time=c(t1,t2),PIA=PIA))
+}}
+
+zero_rough_sets<-function(STP_track1){
+  STP_track1@rough_sets$location_uncertainty<-0
+  STP_track1@rough_sets$time_uncertainty<-0
+  return(STP_track1)
+}
 

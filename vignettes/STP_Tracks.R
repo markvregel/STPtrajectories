@@ -82,7 +82,7 @@ plot(PPA_bear2,add=T)
 
 
 ## ----alibi_query---------------------------------------------------------
-alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = T)# not always correct. package still in development
+alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = F,return_PIA = T)# not always correct. package still in development
 
 
 ## ----STP_plot, webgl=TRUE------------------------------------------------
@@ -144,9 +144,9 @@ shade3d(translate3d(
 vmax<- bear1_sub@connections$vmax[1]*1.6
 # taking into account uncerainty about location and measurement time at control points.
 open3d()
-bear1_sub_rough<-STP_Track(bear1_sub,vmax,0,location_uncertainty = 2,time_uncertainty = 1)
+bear1_sub_rough<-STP_Track(bear1_sub,vmax,0,location_uncertainty = 100,time_uncertainty = 1)
 
-zf<-STP_plot(bear1_sub_rough,alpha = 0.4,col='darkcyan')
+zf<-STP_plot(bear1_sub_rough,alpha = 0.6,col='darkcyan')
 STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
 axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
 

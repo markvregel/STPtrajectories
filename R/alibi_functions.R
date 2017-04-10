@@ -158,6 +158,7 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
 
   Case3 <- function(t1,x1,y1,t2,x2,y2,v1,t3,x3,y3,t4,x4,y4,v2)  # this is case 2 in paper
   {
+    MOE<-1e-13 # margin of error
     if(v1*v2==0) return(F)
     Found <- F
     tmp_crds <- CoordinateChange(t1, x1, y1, t2, x2, y2, t1, x1, y1, t2, x2, y2, t3, x3, y3, t4, x4, y4)
@@ -168,13 +169,13 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
     for(i in 1:length(lroots))
     {
       if(Found) break
-      if(abs(Im(lroots[i])) < 1e-14){
+      if(abs(Im(lroots[i])) < MOE){
         Found <- ParamYRoot(Re(lroots[i]), t2s, x2s, v1) && (0 <= ParamT(Re(lroots[i]), t2s, x2s, v1) &&
                                                                ParamT(Re(lroots[i]), t2s, x2s, v1) <= t2s) && (CheckHalfSpace(
                                                                  ParamT(Re(lroots[i]), t2s, x2s, v1), Re(lroots[i]),
                                                                  ParamY(Re(lroots[i]), t2s, x2s, v1, t3s, x3s, y3s, v2),
                                                                  t3s, x3s, y3s, t4s, x4s, y4s, v2, T) ||
-                                                                   ifelse(abs(y3s) < 1e-14,
+                                                                   ifelse(abs(y3s) < MOE,
                                                                           0 <= ParamT(Re(lroots[i]), t2s, x2s, v1) && ParamT(Re(lroots[i]), t2s, x2s, v1) <= t2s &&
                                                                             CheckHalfSpace(ParamT(Re(lroots[i]), t2s, x2s, v1),
                                                                                            Re(lroots[i]), -ParamY(Re(lroots[i]), t2s, x2s, v1, t3s, x3s,
@@ -186,13 +187,13 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
       for(i in 1:length(lroots))
       {
         if(Found) break
-        if(abs(Im(lroots[i])) < 1e-14){
+        if(abs(Im(lroots[i])) < MOE){
           Found <- ParamYRoot(Re(lroots[i]), t2s, x2s, v1) && (0 <= ParamT(Re(lroots[i]), t2s, x2s, v1) &&
                                                                  ParamT(Re(lroots[i]), t2s, x2s, v1) <= t2s) && (CheckHalfSpace(
                                                                    ParamT(Re(lroots[i]), t2s, x2s, v1), Re(lroots[i]),
                                                                    ParamY(Re(lroots[i]), t2s, x2s, v1, t3s, x3s, y3s, v2),
                                                                    t3s, x3s, y3s, t4s, x4s, y4s, v2, F) ||
-                                                                     ifelse(abs(y4s) < 1e-14,
+                                                                     ifelse(abs(y4s) < MOE,
                                                                             0 <= ParamT(Re(lroots[i]), t2s, x2s, v1) && ParamT(Re(lroots[i]), t2s, x2s, v1) <= t2s &&
                                                                               CheckHalfSpace(ParamT(Re(lroots[i]), t2s, x2s, v1),
                                                                                              Re(lroots[i]), -ParamY(Re(lroots[i]), t2s, x2s, v1, t3s, x3s,
@@ -209,13 +210,13 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
       for(i in 1:length(lroots))
       {
         if(Found) break
-        if(abs(Im(lroots[i])) < 1e-14){
+        if(abs(Im(lroots[i])) < MOE){
           Found <- ParamYRoot(Re(lroots[i]), t4s, x4s, v2) && (0 <= ParamT(Re(lroots[i]), t4s, x4s, v2) &&
                                                                  ParamT(Re(lroots[i]), t4s, x4s, v2) <= t4s) && (CheckHalfSpace(
                                                                    ParamT(Re(lroots[i]), t4s, x4s, v2), Re(lroots[i]),
                                                                    ParamY(Re(lroots[i]), t4s, x4s, v2, t1s, x1s, y1s, v1),
                                                                    t1s, x1s, y1s, t2s, x2s, y2s, v1, T) ||
-                                                                     ifelse(abs(y1s) < 1e-14,
+                                                                     ifelse(abs(y1s) < MOE,
                                                                             CheckHalfSpace(ParamT(Re(lroots[i]), t4s, x4s, v2),
                                                                                            Re(lroots[i]), -ParamY(Re(lroots[i]), t4s, x4s, v2, t1s, x1s,
                                                                                                                   y1s, v1), t1s, x1s, y1s, t2s, x2s, y2s, v1, T), F))
@@ -227,13 +228,13 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
       for(i in 1:length(lroots))
       {
         if(Found) break
-        if(abs(Im(lroots[i])) < 1e-14){
+        if(abs(Im(lroots[i])) < MOE){
           Found <- ParamYRoot(Re(lroots[i]), t4s, x4s, v2) && (0 <= ParamT(Re(lroots[i]), t4s, x4s, v2) &&
                                                                  ParamT(Re(lroots[i]), t4s, x4s, v2) <= t4s) && (CheckHalfSpace(
                                                                    ParamT(Re(lroots[i]), t4s, x4s, v2), Re(lroots[i]),
                                                                    ParamY(Re(lroots[i]), t4s, x4s, v2, t2s, x2s, y2s, v1),
                                                                    t1s, x1s, y1s, t2s, x2s, y2s, v1, F) ||
-                                                                     ifelse(abs(y2s) <1e-14,
+                                                                     ifelse(abs(y2s) <MOE,
                                                                             CheckHalfSpace(ParamT(Re(lroots[i]), t4s, x4s, v2),
                                                                                            Re(lroots[i]), -ParamY(Re(lroots[i]), t4s, x4s, v2, t2s, x2s,
                                                                                                                   y2s, v1), t1s, x1s, y1s, t2s, x2s, y2s, v1, F), F))

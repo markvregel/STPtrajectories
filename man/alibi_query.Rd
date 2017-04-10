@@ -4,7 +4,8 @@
 \alias{alibi_query}
 \title{alibi_query}
 \usage{
-alibi_query(STP_track1, STP_track2, stop_if_true = TRUE)
+alibi_query(STP_track1, STP_track2, stop_if_true = TRUE, return_PIA = FALSE,
+  time_interval = 1)
 }
 \arguments{
 \item{STP_track1}{STP_track1}
