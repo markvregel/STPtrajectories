@@ -2,10 +2,12 @@
 
 #' @title potential_stay
 #' @description Function that calculates the time intervals at which the individual could have been at spgeom,
-#'  a spatial location as a point line or polygon. The total potential stay time may not been equal to the sum of the intervals.
-#'  This applies to multiple potential stay times and if the track has time uncertainty.
+#'  a spatial location as a point, line or polygon. The total potential stay time might not be equal to the sum of the intervals.
+#'  This applies to STP_tracks with multiple intersections for one STP and if the track has time uncertainty.
 #'  If the track has time unceratinty the method calculates the max potential stay for each STP,
 #'  which may result in a time overlap in the returned potential stay time intervals.
+#'  If space-time prism has an activity_time, it is assumed that individual is at the location for the activity.
+#'  The potential_stay time interval is thus not affected by the activity_time if the sp_geom can be reached.
 #' @param STP_track A STP_Track
 #' @param spgeom A Spatialpoints,Spatiallines or Spatialpolygons object
 #' @return A named list with  the potential stay time intervals for each STP that intersects with the spatial geometry
@@ -96,7 +98,7 @@ potential_stay <- function(STP_track, spgeom) {
         if (length(intersection)>1){
           # if intersection results in more than 1 polygon or line then there are multiple time intervals
           warning(paste0("More than one interval for STP " , i,
-                        ". Total potential stay time at input location may not be equal to
+                        ". Total potential stay time at input location is not equal to
                         the sum of time difference between the intervals"))
 
         }}
@@ -114,30 +116,6 @@ potential_stay <- function(STP_track, spgeom) {
         # calculate the time the individual can reach closest point of spgeom from  space-time point
         time1 <- STP@endTime[1]-tu+dist1/STP@connections$vmax
         time2 <- STP@endTime[2]+tu-dist2/STP@connections$vmax
-
-        # activity time in seconds
-        at <- STP@connections$activity_time*60
-
-        ## if  at>0 change time interval accordingly
-        if (at>0){
-          # calculate halfway time
-          tdiff<-difftime(STP@endTime[2],STP@endTime[1],units = 'secs')
-          middle_time <- STP@endTime[1]+tdiff/2
-          # calculate period of no movement; the time of activity
-          no_movement<<-c(middle_time-at/2,middle_time+at/2)
-          # update time intervals
-          # if (time1>=no_movement[1] & time2<=no_movement[2]) no need to change time intervals
-            if(time2<no_movement[2]& time1<no_movement[1]){
-              time2 <- time2 - at
-            }
-              if(time1>no_movement[1]& time2>no_movement[2]){
-                time1 <- time1 + at
-            }}
-
-
-
-
-
 
         # list intervals and add stp number as name
         STP_int <- list(c(time1,time2))

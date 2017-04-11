@@ -211,9 +211,6 @@ calc_PIA<-function(STP1,STP2,time_interval){
 
     }
   }
-
-
-
   t1<-times[t1i]
   t2<- times[t1i+length(PIAs)-1]
   if (is.null(PIAs)){

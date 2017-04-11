@@ -50,7 +50,7 @@
 #'# plot
 #'plot(STP_track1,type='p',pch=19,cex=0.8)
 #'# calculate PPA and add to plot
-#'PPA<-calculate_PPA(STP_track1)
+#'PPA<-PPA(STP_track1)
 #'plot(PPA,add=TRUE)
 #'
 #'#------------------------------example 2------------------------------
@@ -59,7 +59,7 @@
 #'vmax<- getVmaxtrack(STP_track1) + (max(STP_track1@data$elevation[1:n-1])-STP_track1@data$elevation[1:n-1])*0.01
 #'STP_track1@connections$vmax<-vmax
 #'# calculate PPA
-#'PPA<-calculate_PPA(STP_track1)
+#'PPA<-PPA(STP_track1)
 #'# create tracksCollection and plot
 #'tracks = Tracks(list(tr1 = STP_track1))
 #'tracksCollection = TracksCollection(list(tr = tracks))
@@ -72,7 +72,7 @@
 #'# Assuming that if two points are closer together the max speed is lower
 #'STP_track1@connections$vmax<-STP_track1@connections$speed*1.5
 #'# calculate PPA
-#'PPA<-calculate_PPA(STP_track1)
+#'PPA<-PPA(STP_track1)
 #'# create tracksCollection and plot
 #'plot(PPA,add=TRUE)
 #'tracks = Tracks(list(tr1 = STP_track1))
@@ -112,10 +112,11 @@ STP_Track<-setClass(
 
     # time uncertainty in seconds
     tu <- object@rough_sets$time_uncertainty*60
-    #speedCheck<-object@connections$vmax>=object@connections$speed
-    n <- length(object)
-    time<-difftime((object@endTime[2:n])+tu,(object@endTime[1:n-1])-tu,units = 'secs')-object@connections$activity_time*60
 
+    n <- length(object)
+    # time to travel
+    time<-difftime((object@endTime[2:n])+tu,(object@endTime[1:n-1])-tu,units = 'secs')-object@connections$activity_time*60
+    # distance that can be covered must be equal to or smaller than the distance between two points
     speedCheck<-object@connections$distance<=object@connections$vmax*time
 
     if((FALSE %in% speedCheck)) {

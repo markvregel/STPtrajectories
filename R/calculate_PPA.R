@@ -199,29 +199,6 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   t1 = abs(difftime(STP@endTime[p1],t,units = 'secs'))
   t2 = abs(difftime(STP@endTime[p2],t,units = 'secs'))
 
-
-  ## if  at>0 change time budgets accordingly
-  if (at>0){
-    # calculate halfway time
-    tdiff<-abs(difftime(STP@endTime[p1],STP@endTime[p2],units = 'secs'))
-    middle_time <- STP@endTime[p1]+tdiff/2
-    # calculate period of no movement; the time of activity
-    no_movement<-c(middle_time-at/2,middle_time+at/2)
-    # recalculate time budgets
-    if (t>=no_movement[1] & t<=no_movement[2]){
-      time_budget<-difftime(STP@endTime[p2],middle_time,units = 'secs')
-      t1 <-time_budget-at/2
-      t2 <- time_budget-at/2
-    }else{
-      if(t<no_movement[1]){
-        t2<- t2-at
-
-      }else{
-        if(t>no_movement[2])
-          t1<- t1-at
-
-      }}}
-
   #calculate the maximum travel dictance strating form the two points in m
   # now assuming meters as unit for the projecition<-----------------------------------------
   s1 = v*as.numeric(t1)
@@ -237,13 +214,20 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
   if(t==STP@endTime[p2] & lu>0){
     return(gBuffer(endpoint,width = lu))
   }
-  PPA <- tryCatch(
+  tryCatch(
     {
       if (t1>0 & t2 >0){
         # calculate area that can be reached from each point
         buffer1<-gBuffer(startpoint,width=s1,quadsegs=qs)#default 6, first test 7
         buffer2<-gBuffer(endpoint,width=s2,quadsegs=qs)
-        PPA<-gIntersection(buffer1,buffer2)}
+        PPA1<-gIntersection(buffer1,buffer2)
+        if(at>0){
+          #restore time
+          STP@endTime[p1]<-STP@endTime[p1]+tu
+          STP@endTime[p2]<-STP@endTime[p2]-tu
+          PPA1<-gIntersection(PPA1,PPA(STP[p1:p2,'']))
+        }
+        return(PPA1)}
       else {
         NA}
 
@@ -260,9 +244,8 @@ calc_PPA <- function(STP,t,points=NULL,qs=12){
       message("Here's the original warning message:")
       message(cond)
       # return PPA
-      return(PPA)
+      return(PPA1)
     })
-  return(PPA)
 }
 
 # @title calcPPA_STP

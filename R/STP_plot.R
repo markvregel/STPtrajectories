@@ -7,6 +7,10 @@
 #' @param zfactor realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data
 #' @param color of STP(s).
 #' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.
+#' @param alpha transparency of STPs. between 0 and 1
+#' @param cut_prisms In case of time uncerainty: wheter to cut the middle and
+#' normally overlapping prisms at the original time of the space-time points.
+#' Only relevant if alpha<1. default is TRUE
 #' @importFrom  rgl translate3d extrude3d shade3d
 #' @importFrom geometry convhulln
 #' @author Mark ten Vregelaar
@@ -64,7 +68,7 @@
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
 STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
-                   st=NULL,alpha=1){
+                   st=NULL,alpha=1,cut_prisms=TRUE){
   # get length of STP_track
   n <- length(STP_track)
   # time_interval in seconds
@@ -107,27 +111,50 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   if(tail(times,1)!=STP_track@endTime[i+1]){
   times<-c(times,STP_track@endTime[i+1])
   }
+  at <- STP_track@connections$activity_time[i]
+  # if there is activty time calculate normal PPA and clip to smaller PPA with at
+  if(at>0){
+    STP <- STP_track[i:(i+1),'']
+    PPA_STP <-PPA(STP)
+    STP_track@connections$activity_time[i]<-0
+    suppressWarnings(PPAS<-lapply(times, function(x) {
+      PPA1<-PPA(STP_track,points = c(i,i+1), x,quadsegs = 12)
+      # only intersect if PPA could be calcualted
+      if(is.na(PPA1)){
+        return(PPA1)
+        }else{
+          gIntersection(PPA1,PPA_STP)
+        }
+    }))
+    STP_track@connections$activity_time[i]<-at
+  }else{
 
   # calculate PPAS
   suppressWarnings(PPAS<-lapply(times, function(x) {
-    PPA(STP_track, x,quadsegs = 12)
+    PPA(STP_track, x,points = c(i,i+1),quadsegs = 12)
   }))
+    }
 
-  #create times and ppas tip and top of STP_track in case of time uncertainty
-  if(tu>0 & (i==1 | i==n-1)){
+  #create times and ppas bottum and top of STP_track in case of time uncertainty
+  # and if cut_prisms is FALSE or if stp is first or last
+   if(tu>0 & (i==1 | i==n-1 | !cut_prisms)){
+
     STP1 <- STP_track[i:(i+1),'']
     STP1@rough_sets$time_uncertainty <- 0
     STP1@endTime<-c(STP1@endTime[1] - tu,STP1@endTime[2] + tu)
-    if(i==1){
-      times1 <- seq(STP_track@endTime[1]-tu,STP_track@endTime[1]-time_interval,time_interval)
+    #bottum
+    if(i==1 | !cut_prisms){
+      times1 <- seq(STP_track@endTime[i]-tu,STP_track@endTime[i]-time_interval,time_interval)
       suppressWarnings(PPAS1<-lapply(times1, function(x) {
         PPA(STP1, x)
       }))
       PPAS<-c(PPAS1,PPAS)
-      times<-c(times1,times)}
-  if(i==(n-1)){
+      times<-c(times1,times)
+    }
+    #top
+  if(i==(n-1) | !cut_prisms){
 
-    times2 <- seq(STP_track@endTime[n]+time_interval,STP_track@endTime[n]+tu,time_interval)
+    times2 <- seq(STP_track@endTime[i+1]+time_interval,STP_track@endTime[i+1]+tu,time_interval)
     suppressWarnings(PPAS2<-lapply(times2, function(x) {
       PPA(STP1, x)
     }))
@@ -162,52 +189,31 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   zz<-STP_coords$z
 
   # add orignal space-time points to STP if there is no point uncerainty.
-  # results in overlappint STPs if tu >0
+  # results in overlappint STPs if tu >0 & cut_prisms==FAlSE
   if(STP_track@rough_sets$location_uncertainty==0){
-    # add lower control point
-    xx<-c(STP_track@sp@coords[i,1],xx)
-    yy<-c(STP_track@sp@coords[i,2],yy)
-    zz<-c((as.numeric(difftime((STP_track@endTime[(i)]-tu),st,units = 'min')))*zfac,zz)
-
-    # add upper control point
-    xx<-c(xx,STP_track@sp@coords[(i+1),1])
-    yy<-c(yy,STP_track@sp@coords[(i+1),2])
-    zz<-c(zz,(as.numeric(difftime((STP_track@endTime[(i+1)]+tu),st,units = 'min')))*zfac)
+    # add 1st control point
+    if(!cut_prisms | tu ==0 | i==1){
+    STP_coords$x<-c(STP_track@sp@coords[i,1],STP_coords$x)
+    STP_coords$y<-c(STP_track@sp@coords[i,2],STP_coords$y)
+    STP_coords$z<-c((as.numeric(difftime((STP_track@endTime[(i)]-tu),st,units = 'min')))*zfac,STP_coords$z)
+    }
+    # add 2nd control point
+    if(!cut_prisms | tu ==0 | i==(n-1)){
+    STP_coords$x<-c(STP_coords$x,STP_track@sp@coords[(i+1),1])
+    STP_coords$y<-c(STP_coords$y,STP_track@sp@coords[(i+1),2])
+    STP_coords$z<-c(STP_coords$z,(as.numeric(difftime((STP_track@endTime[(i+1)]+tu),st,units = 'min')))*zfac)
+    }
   }
 
   # matrix with all coordinates
-  stp3d<-matrix(c(xx,yy,zz),ncol=3)
+  stp3d<-do.call(cbind,STP_coords)
 
-  at <- STP_track@connections$activity_time[i]*60
-  # if activity time bigger than 0 take convexhull of stp parts separately
-  if (at>0){
-    # calculate halfway time
-    tdiff<-abs(difftime(STP_track@endTime[i],STP_track@endTime[(i+1)],units = 'secs'))
-    middle_time <- STP_track@endTime[i]+tdiff/2
 
-    b1 <- as.numeric(difftime(middle_time-at/2,st,units='mins')*zfac)
-    b2 <- as.numeric(difftime(middle_time+at/2,st,units='mins')*zfac)
-
-    # split inot upper cone bottum cone and zone of no movement(part2)
-    part1<-stp3d[stp3d[,3]<=(b1+time_interval/60*zfac),]
-    part2<-stp3d[stp3d[,3]>=b1 & stp3d[,3]<=b2,]
-    part3<-stp3d[stp3d[,3]>=(b2-time_interval/60*zfac),]
-
-    # get convexhull
-    conv1<-t(convhulln(part1))
-    conv2<-t(convhulln(part2))
-    conv3<-t(convhulln(part3))
-    # plot the three parts
-    rgl.triangles(part1[conv1,1],part1[conv1,2],part1[conv1,3],col=col,alpha=alpha)
-    rgl.triangles(part2[conv2,1],part2[conv2,2],part2[conv2,3],col=col,alpha=alpha)
-    rgl.triangles(part3[conv3,1],part3[conv3,2],part3[conv3,3],col=col,alpha=alpha)
-  }else{
     # take convexhull and plot STP
-
     conv<-t(convhulln(stp3d))
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
 
-  }
+
 
   }
   # return zfactor is it was not provided
