@@ -38,18 +38,14 @@ alibi<-function(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2){
 
 
   if(Case1(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)){
-    message('Case 1')
-    return(TRUE)
+    return(1)
   }
 
   else if(Case2(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)){
-    message('Case 2')
-    return(TRUE)
+    return(2)
   }
-
   else if(Case3(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)){
-    message('Case 3')
-    return(TRUE)
+    return(3)
   }
   else{
     return(FALSE)

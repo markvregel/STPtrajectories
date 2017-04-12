@@ -103,7 +103,7 @@ for (i in 1:(length(track1)-1)){
           }else{
             STPs<-c(i,j)
           }
-          message(c(TRUE, paste(': possibe intersection for STPs/connections ',STPs[1],'and',STPs[2])))
+          #message(c(TRUE, paste(': possibe intersection for STPs/connections ',STPs[1],'and',STPs[2])))
           points<-list('a'=STPs[1]:(STPs[1]+1),
             'b'=STPs[2]:(STPs[2]+1))
 
@@ -133,10 +133,12 @@ if (length(Trues)>0){
 
 alibi_STP <- function(STP1,STP2){
 
+  # unpack track values
+
 
   ts<-c(STP1@endTime[1],STP1@endTime[2],STP2@endTime[1],STP2@endTime[2])
   tmin<-min(ts)
-  ts<-abs(as.numeric(difftime(tmin,ts,units = 'secs')))#<--------------------------
+  ts<-as.numeric(difftime(ts,tmin,units = 'secs'))#<--------------------------
   t1<-ts[1];t2<-ts[2];t3<-ts[3];t4<-ts[4]
 
   x1 <- STP1@sp@coords[1,1]
@@ -155,7 +157,23 @@ alibi_STP <- function(STP1,STP2){
 
   v2 <- STP2@connections$vmax
 
-  return(alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2))
+  result<-alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2)
+
+  query_result<-FALSE
+  if(is.numeric(result)){
+    #message(paste0("Case ",result))
+    if(result==3){
+      if(gIntersects(PPA(STP1),PPA(STP2))){
+        query_result<-TRUE
+      }else{
+      }}else{
+        query_result<-TRUE
+      }}
+
+
+
+
+  return(query_result)
 }
 
 calc_PIA<-function(STP1,STP2,time_interval){
@@ -168,7 +186,6 @@ calc_PIA<-function(STP1,STP2,time_interval){
   # Calculate time interval for which meeting is possible
   STP1_time<-potential_stay(STP1,PPIA)[[1]]
   STP2_time<- potential_stay(STP2,PPIA)[[1]]
-
 
   if(STP1_time[1]>STP2_time[1]){
     st <- STP1_time[1]
@@ -189,7 +206,9 @@ calc_PIA<-function(STP1,STP2,time_interval){
   if(st == STP1@endTime[1] | st == STP2@endTime[1] ){
     st<-st+time_interval
   }
-
+  if (st>et){
+    return(list("False positive by alibi query. No meeting possible"))
+  }
   times<-seq(st,et,time_interval)# times for which will be tested if intersection is possible
   PIAs<-c()
   t1_unknown=T
@@ -211,21 +230,20 @@ calc_PIA<-function(STP1,STP2,time_interval){
 
     }
   }
-  t1<-times[t1i]
-  t2<- times[t1i+length(PIAs)-1]
-  if (is.null(PIAs)){
+
+  if (t1_unknown){
     return(list("False positive by alibi query. No meeting possible"))
   }else{
+    t1<-times[t1i]
+    t2<- times[t1i+length(PIAs)-1]
   PIA_polygons<-do.call(bind,PIAs)
   PIA<-gConvexHull(PIA_polygons)
   # if case 1: control point in PIA, adjust t1 and t2
   if(gIntersects(STP1@sp[1,],PIA) | gIntersects(STP2@sp[1,],PIA)){
     t1<-t1-time_interval
-    print('a')
     }
 
   if(gIntersects(STP1@sp[2,],PIA) | gIntersects(STP2@sp[2,],PIA)){
-    print('b')
     t2<-t2+time_interval}
 
   return(list(meeting_time=c(t1,t2),PIA=PIA))
