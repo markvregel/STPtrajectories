@@ -5,7 +5,7 @@
 \title{STP_plot}
 \usage{
 STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
-  st = NULL, alpha = 1)
+  st = NULL, alpha = 1, cut_prisms = TRUE)
 }
 \arguments{
 \item{STP_track}{A STP_Track.}
@@ -15,6 +15,12 @@ STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
 \item{zfactor}{realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data}
 
 \item{st}{start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.}
+
+\item{alpha}{transparency of STPs. between 0 and 1}
+
+\item{cut_prisms}{In case of time uncerainty: wheter to cut the middle and
+normally overlapping prisms at the original time of the space-time points.
+Only relevant if alpha<1. default is TRUE}
 
 \item{color}{of STP(s).}
 }

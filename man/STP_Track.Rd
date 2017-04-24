@@ -78,7 +78,7 @@ STP_track1<-STP_Track(my_track1,v1)
 # plot
 plot(STP_track1,type='p',pch=19,cex=0.8)
 # calculate PPA and add to plot
-PPA<-calculate_PPA(STP_track1)
+PPA<-PPA(STP_track1)
 plot(PPA,add=TRUE)
 
 #------------------------------example 2------------------------------
@@ -87,7 +87,7 @@ plot(PPA,add=TRUE)
 vmax<- getVmaxtrack(STP_track1) + (max(STP_track1@data$elevation[1:n-1])-STP_track1@data$elevation[1:n-1])*0.01
 STP_track1@connections$vmax<-vmax
 # calculate PPA
-PPA<-calculate_PPA(STP_track1)
+PPA<-PPA(STP_track1)
 # create tracksCollection and plot
 tracks = Tracks(list(tr1 = STP_track1))
 tracksCollection = TracksCollection(list(tr = tracks))
@@ -100,7 +100,7 @@ stplot(tracksCollection, attr = "elevation", lwd = 3, scales = list(draw =TRUE),
 # Assuming that if two points are closer together the max speed is lower
 STP_track1@connections$vmax<-STP_track1@connections$speed*1.5
 # calculate PPA
-PPA<-calculate_PPA(STP_track1)
+PPA<-PPA(STP_track1)
 # create tracksCollection and plot
 plot(PPA,add=TRUE)
 tracks = Tracks(list(tr1 = STP_track1))

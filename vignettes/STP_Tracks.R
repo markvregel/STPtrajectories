@@ -143,11 +143,16 @@ shade3d(translate3d(
 # higher maximum speed 
 vmax<- bear1_sub@connections$vmax[1]*1.6
 # taking into account uncerainty about location and measurement time at control points.
-open3d()
 bear1_sub_rough<-STP_Track(bear1_sub,vmax,0,location_uncertainty = 100,time_uncertainty = 1)
-
+open3d()
 zf<-STP_plot(bear1_sub_rough,alpha = 0.6,col='darkcyan')
 STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
 axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
 
+
+## ---- webgl=TRUE---------------------------------------------------------
+bear1_activity<-STP_Track(bear1_sub,vmax,activity_time = 3)
+open3d()
+zf<-STP_plot(bear1_activity,col='darkcyan')
+axes_STP_plot(c(bear1_activity@endTime[1],bear1_activity@endTime[6]),z_factor = zf)
 

@@ -16,10 +16,12 @@ A named list with  the potential stay time intervals for each STP that intersect
 }
 \description{
 Function that calculates the time intervals at which the individual could have been at spgeom,
- a spatial location as a point line or polygon. The total potential stay time may not been equal to the sum of the intervals.
- This applies to multiple potential stay times and if the track has time uncertainty.
+ a spatial location as a point, line or polygon. The total potential stay time might not be equal to the sum of the intervals.
+ This applies to STP_tracks with multiple intersections for one STP and if the track has time uncertainty.
  If the track has time unceratinty the method calculates the max potential stay for each STP,
  which may result in a time overlap in the returned potential stay time intervals.
+ If space-time prism has an activity_time, it is assumed that individual is at the location for the activity.
+ The potential_stay time interval is thus not affected by the activity_time if the sp_geom can be reached.
 }
 \examples{
 library(rgeos)
