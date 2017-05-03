@@ -189,7 +189,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   zz<-STP_coords$z
 
   # add orignal space-time points to STP if there is no point uncerainty.
-  # results in overlappint STPs if tu >0 & cut_prisms==FAlSE
+  # results in overlapping STPs if tu >0 & cut_prisms==FAlSE
   if(STP_track@rough_sets$location_uncertainty==0){
     # add 1st control point
     if(!cut_prisms | tu ==0 | i==1){
