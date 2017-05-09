@@ -286,8 +286,8 @@ calcPPA_STP <- function(STP,x_density=250){
 
   # total distance that can be covered
   s=v*t
-  # distance that can still be covered after reaching the other point
-  dist <- (s-STP@connections$distance)/2
+  # distance that can be reached
+  dist <- s/2
 
   # caclulate values for the x coordinate usingthe remaining distance
   if(x1<x2){

@@ -70,4 +70,4 @@ Getting help
 2. Search in the manual: [STPtrajectories.pdf](https://github.com/markvregel/STPtrajectories/blob/master/STPtrajectories.pdf)
 3. [Read the vignettes](http://htmlpreview.github.io/?https://raw.githubusercontent.com/markvregel/STPtrajectories/master/vignettes/STP_Tracks.html)
 
-[Also look at the help of the trajecoties package](https://cran.rstudio.com/web/packages/trajectories/index.html)
+[Also look at the help of the trajectories package](https://cran.rstudio.com/web/packages/trajectories/index.html)

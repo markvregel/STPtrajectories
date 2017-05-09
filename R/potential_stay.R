@@ -1,4 +1,4 @@
-# potential stay
+ # potential stay
 
 #' @title potential_stay
 #' @description Function that calculates the time intervals at which the individual could have been at spgeom,
