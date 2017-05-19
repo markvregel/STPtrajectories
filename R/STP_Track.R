@@ -13,6 +13,7 @@
 #' @param time_uncertainty Uncertainty of the time of the space-time points in minutes.
 #' Either one time_uncertainty for entire track or a vector with the time_uncertainty for each point.
 #' @inheritSection trajectories::Track Slots of class "Track"
+#' @importFrom sp is.projected
 #' @seealso rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 #' @examples
 #'library(spacetime)

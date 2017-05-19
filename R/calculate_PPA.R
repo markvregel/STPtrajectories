@@ -295,7 +295,6 @@ calcPPA_STP <- function(STP,x_density=250){
   }else{
     xrange<-c(x2-dist,x1+dist)
   }
-
   xpoints<-seq(xrange[1],xrange[2],length=x_density)
   # calculate y coordinates. y_segment1 and y_segment2 are both half a ellipse or circle
   suppressWarnings(yCoords<-sapply(xpoints,simplify = "array", function(x0) {
@@ -317,6 +316,7 @@ calcPPA_STP <- function(STP,x_density=250){
 
     c(y_segment1,y_segment2)
   }))
+
   # put results in data frame and remove NANs
   coords<-data.frame(x=rep(xpoints,2),y=c(yCoords[1,],yCoords[2,]))
   coords<-coords[complete.cases(coords),]

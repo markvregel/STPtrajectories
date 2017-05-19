@@ -103,22 +103,15 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
 
     # if all segments within max_time_interval stop
     if(length(exceed_seg)==0){
-      warning("All the time differences between consecutive space-time points are smaller than max_time_interval.
+      warning("All the time difference between consecutive space-time points are smaller than max_time_interval.
               No new points added")
       return(STP_track)
     }
   }else{
-    # if no max_time_interval is provided add  point to all segments
+    # if no max_time_interval is provided add point(s) to all segments
     exceed_seg<-1:(length(STP_track)-1)
   }
-  # create SpatialPointsDataFrame with all existing points
-  all_points<-SpatialPointsDataFrame(STP_track@sp,data=data.frame(time=STP_track@endTime))
 
-  n_points <- n_points +2  # add two for already existing points
-  random_STP_track<-STP_track
-  c=0
-
-  vvec<-STP_track@connections$vmax
   if(any(STP_track@connections$activity_time>0)){
     warning("The RTG does not take into account the activity time in the STP_Track")
     STP_track@connections$activity_time<-0
@@ -131,6 +124,15 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
   }
 
 
+  # create SpatialPointsDataFrame with all existing points
+  all_points<-SpatialPointsDataFrame(STP_track@sp,data=data.frame(time=STP_track@endTime))
+  # cumber of points
+  n_points <- n_points +2  # add two for already existing points
+  # counter
+  c=0
+  # vector for stroting vmax of new trajectory
+  vvec<-STP_track@connections$vmax
+
   # loop through segments to add points
   for (i in exceed_seg){
     # get STP that corresponds with segment
@@ -138,54 +140,67 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
     # obtain time and speed
     t1 <- STP@endTime[[1]]
     t2 <- STP@endTime[[2]]
+    v <- STP@connections$vmax
 
     # Times for which PPA needs to be calculated in random order to avoid drifting(see Technitis et al.)
     PPA_times<-seq(t1,t2,length.out = n_points)
     shuffled_times<-sample(PPA_times[2:(length(PPA_times)-1)])
-    length_times<-length(shuffled_times)
 
-    v <- STP@connections$vmax
+    # initialize variables for loop through shuffled_times
+    startpoint <- SpatialPointsDataFrame(STP@sp[1,],data=data.frame(time=t1),match.ID = FALSE)
+    endpoint <- SpatialPointsDataFrame(STP@sp[2,],data=data.frame(time=t2),match.ID = FALSE)
+    points<-rbind(startpoint,endpoint)#SpatialPointsDataFrame with orignal space-time points
 
-
-    for (j in 1:length_times){
+    for (j in 1:length(shuffled_times)){
       t<-shuffled_times[j]# the time for which a new point needs to be added
 
+      # get the two surrounding space-time points for the newly to add point
+      t1<-max(points$time[points$time<=t])
+      t2<-min(points$time[points$time>=t])
+      startpoint<-points[points$time==t1,]
+      endpoint <- points[points$time==t2,]
 
-      PPA<-PPA(random_STP_track,t)
+      # get time difference between the two surrounding points and t
+      t_dif1 = abs(difftime(t1,t,units = 'secs'))
+      t_dif2 = abs(difftime(t2,t,units = 'secs'))
+
+      # calculate the maximum travel dictance starting form the two points
+      s1 = v*as.numeric(t_dif1)
+      s2 = v*as.numeric(t_dif2)
+
+      # calculate the PPA based on itersections of the two buffers
+      buffer1<-gBuffer(startpoint,width=s1,quadsegs=quadsegs)
+      buffer2<-gBuffer(endpoint,width=s2,quadsegs=quadsegs)
+      PPA<-gIntersection(buffer1,buffer2)
 
       # randomly select point in PPA
       npoint<-spsample(PPA,1,type = 'random',iter=iter)
       npoint<-SpatialPointsDataFrame(npoint,data=data.frame(time=t))
 
-      # add the newly created point(s) to all_points
-      all_points<-rbind(all_points,npoint)
-
-      pointsOrdered<-all_points[order(all_points$time),]
+      # add point to the SpatialPointsDataFrame with the two orginal points and other random points
+      points<-spRbind(points,npoint)# problems with rbind
+      # update vvec
       vvec<-c(vvec[1:(c+i)],v,tail(vvec,length(STP_track)-1-i))
-
-
-      rownames(pointsOrdered@data)<-1:length(all_points)
-      # create class STIDF
-      random_STIDF = STIDF(pointsOrdered, pointsOrdered$time,data.frame(rep(NA,length(all_points))))
-      # Track-class {trajectories}
-      random_track<-Track(random_STIDF)
-      # STP_track class
-      random_STP_track<-STP_Track(random_track,vvec)
       c=c+1
     }
+    # add the newly created point(s) to all_points
+    all_points<-rbind(all_points,points[points$time %in% shuffled_times,])# points[3:n_points,]
+
   }
-
-
+  # fix order
+  all_points<-all_points[order(all_points$time),]
+  rownames(all_points@data)<-1:length(all_points)
   data_template<-STP_track@data
   data_template[]<-NA
   # create class STIDF
-  random_STIDF = STIDF(pointsOrdered, pointsOrdered$time, data_template)
+  random_STIDF = STIDF(all_points, all_points$time, data_template)
   # return original data
   random_STIDF@data[random_STIDF@endTime %in% STP_track@endTime,] <- STP_track@data
   # Track-class {trajectories}
   random_track<-Track(random_STIDF)
   # STP_track class
   random_STP<-STP_Track(random_track,vvec)
+
   return(random_STP)
   }
 

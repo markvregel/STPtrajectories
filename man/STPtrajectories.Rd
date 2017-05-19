@@ -20,7 +20,7 @@ A space-time prism(STP) is defined as the collection of space-time locations the
 given a speed limitation. The \link{STP_Track} class can be used to handle space-time prism trajectories.
 
 The \link{alibi_query} uses this concept to test if two individuals could have met each other.
-The package provides related functions to help users in the analysis
+The package provides related functions to help users in their analysis.
 of their trajectories and take into account the uncertainty about the location of an individual.
 These include methods to visualise space-time prisms(\link{STP_plot}),
 calculate the potential path area(\link{calculate_PPA}) and a random trajectory generator(\link{RTG}).
