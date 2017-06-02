@@ -11,6 +11,7 @@
 #' @param cut_prisms In case of time uncerainty: wheter to cut the middle and
 #' normally overlapping prisms at the original time of the space-time points.
 #' Only relevant if alpha<1. default is TRUE
+#' @param quadsegs Passed to PPA Number of line segments to use to approximate a quarter circle.
 #' @importFrom  rgl translate3d extrude3d shade3d
 #' @importFrom geometry convhulln
 #' @author Mark ten Vregelaar
@@ -68,7 +69,7 @@
 #'title3d(main = '2 randomly generated STP tracks')
 #'bg3d('lightblue')
 STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
-                   st=NULL,alpha=1,cut_prisms=TRUE){
+                   st=NULL,alpha=1,cut_prisms=TRUE,quadsegs=12){
   # get length of STP_track
   n <- length(STP_track)
   # time_interval in seconds
@@ -118,7 +119,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     PPA_STP <-PPA(STP)
     STP_track@connections$activity_time[i]<-0
     suppressWarnings(PPAS<-lapply(times, function(x) {
-      PPA1<-PPA(STP_track,points = c(i,i+1), x,quadsegs = 12)
+      PPA1<-PPA(STP_track,points = c(i,i+1), x,quadsegs = quadsegs)
       # only intersect if PPA could be calcualted
       if(is.na(PPA1)){
         return(PPA1)
@@ -131,7 +132,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
 
   # calculate PPAS
   suppressWarnings(PPAS<-lapply(times, function(x) {
-    PPA(STP_track, x,points = c(i,i+1),quadsegs = 12)
+    PPA(STP_track, x,points = c(i,i+1),quadsegs = quadsegs)
   }))
     }
 
@@ -184,9 +185,6 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     list(x=x,y=y,z=z)
     })
   STP_coords<-do.call(Map,c(c,STP_coords))
-  xx<-STP_coords$x
-  yy<-STP_coords$y
-  zz<-STP_coords$z
 
   # add orignal space-time points to STP if there is no point uncerainty.
   # results in overlapping STPs if tu >0 & cut_prisms==FAlSE
@@ -212,8 +210,6 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     # take convexhull and plot STP
     conv<-t(convhulln(stp3d))
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
-
-
 
   }
   # return zfactor is it was not provided

@@ -5,7 +5,7 @@
 \title{STP_plot}
 \usage{
 STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
-  st = NULL, alpha = 1, cut_prisms = TRUE)
+  st = NULL, alpha = 1, cut_prisms = TRUE, quadsegs = 12)
 }
 \arguments{
 \item{STP_track}{A STP_Track.}
@@ -21,6 +21,8 @@ STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
 \item{cut_prisms}{In case of time uncerainty: wheter to cut the middle and
 normally overlapping prisms at the original time of the space-time points.
 Only relevant if alpha<1. default is TRUE}
+
+\item{quadsegs}{Passed to PPA Number of line segments to use to approximate a quarter circle.}
 
 \item{color}{of STP(s).}
 }

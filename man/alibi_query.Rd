@@ -5,7 +5,7 @@
 \title{alibi_query}
 \usage{
 alibi_query(STP_track1, STP_track2, stop_if_true = TRUE, return_PIA = FALSE,
-  time_interval = 1)
+  time_interval = 5)
 }
 \arguments{
 \item{STP_track1}{STP_track1}
@@ -13,9 +13,14 @@ alibi_query(STP_track1, STP_track2, stop_if_true = TRUE, return_PIA = FALSE,
 \item{STP_track2}{STP_track2}
 
 \item{stop_if_true}{logigal:Stop if intersection is found. Default=TRUE}
+
+\item{time_interval}{Accuracy  in seconds of Potential Intersection Area(PIA) and time period that individuals could have been at the same location.
+Default is 5 seconds, meaning that time period and PIA are based on PPAs calculated for every 5 seconds.}
 }
 \value{
-If TRUE returns vector space-time point of intersecting STPs. IF no intersection is found returns FALSE
+If intersection is found, method returns vector with space-time point of intersecting STPs.
+If PIA is True method returns Potential Intersection Area(PIA) and time
+If no intersection is found returns FALSE and the time period that individuals could have been at the same location.
 }
 \description{
 CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!
