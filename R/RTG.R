@@ -104,14 +104,14 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
 
     # if all segments within max_time_interval stop
     if(length(exceed_seg)==0){
-      if(is.numeric(max_time_interval)){}
+      if(is.numeric(max_time_interval)){
       warning("All the time difference between consecutive space-time points are smaller than max_time_interval.
               No new points added")
       return(STP_track)
       }else{
-      stop("max_time_interval must be numeric")
+      stop("Wrong input: max_time_interval must be numeric")
     }
-
+  }
   }else{
     # if no max_time_interval is provided add point(s) to all segments
     exceed_seg<-1:(length(STP_track)-1)
