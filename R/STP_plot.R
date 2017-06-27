@@ -246,4 +246,3 @@ axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5,expand=1.1){
   axes3d(c('x--', 'x+-', 'y--', 'y+-'),nticks = n_ticks_xy)
 
 }
-devtools::install_github("markvregel/STPtrajectories")
