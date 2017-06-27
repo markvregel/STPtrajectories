@@ -6,10 +6,11 @@
 #' The added points are evenly divided over time and are always within the space-time prism.
 #'
 #' @param STP_track the  \link{STP_Track} to which the randomly generated space-time points are added
-#' @param max_time_interval  The max_time_interval determines between which space-time points the random points are added.
-#' If the time difference between two points is bigger than max_time_interval,
 #' @param n_points number of points will be added between the two points.
 #' If no value is provided new point(s) will be added between all consecutive space-time points
+#' @param max_time_interval The max_time_interval(numeric) is the maximum allowed time difference in minutes between existing control points.
+#' If the time difference between two points is bigger than max_time_interval, new control point(S) are added in between the original control points.
+#' The Default is NULL, in which case between all control points n_points are added.
 #' @param quadsegs Passed to buffer. Number of line segments to use to approximate a quarter circle.
 #' Only used where paramter time_interval is relavant
 #' @param iter number of times to try to place sample points in the PPA before giving up and returning NULLter (default = 4) -
@@ -103,10 +104,14 @@ RTG<-function(STP_track,n_points=1,max_time_interval=NULL,quadsegs=12,iter=4){
 
     # if all segments within max_time_interval stop
     if(length(exceed_seg)==0){
+      if(is.numeric(max_time_interval)){}
       warning("All the time difference between consecutive space-time points are smaller than max_time_interval.
               No new points added")
       return(STP_track)
+      }else{
+      stop("max_time_interval must be numeric")
     }
+
   }else{
     # if no max_time_interval is provided add point(s) to all segments
     exceed_seg<-1:(length(STP_track)-1)

@@ -131,5 +131,5 @@ STP_track1_b<-STP_track1[seq(1,n,2),'2017-01-01 12:00:00 CET::2017-01-02 16:00:0
 STP_track1_c<-STP_track1[1:n,"T22:00/T08:00"] # see package xts for more handy subsetting tricks
 }
 \seealso{
-rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
+trajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 }

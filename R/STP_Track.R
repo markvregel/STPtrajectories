@@ -14,7 +14,7 @@
 #' Either one time_uncertainty for entire track or a vector with the time_uncertainty for each point.
 #' @inheritSection trajectories::Track Slots of class "Track"
 #' @importFrom sp is.projected
-#' @seealso rajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
+#' @seealso trajecotries package :\url{https://cran.rstudio.com/web/packages/trajectories/index.html}
 #' @examples
 #'library(spacetime)
 #'library(sp)
@@ -138,7 +138,6 @@ STP_Track = function(track,vmax,activity_time=0,location_uncertainty=0, time_unc
   # vmax distance unit projection/seconds
   # degrees are converted to Great Circle distance in meters and thus m/s
   track@connections$vmax <- vmax
-
   track@connections$activity_time <- activity_time
   # track@connections$location_uncertainty <- location_uncertainty
   # track@connections$time_uncertainty <- time_uncertainty

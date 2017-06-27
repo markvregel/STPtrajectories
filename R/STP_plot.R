@@ -12,7 +12,7 @@
 #' normally overlapping prisms at the original time of the space-time points.
 #' Only relevant if alpha<1. default is TRUE
 #' @param quadsegs Passed to PPA Number of line segments to use to approximate a quarter circle.
-#' @importFrom  rgl translate3d extrude3d shade3d
+#' @importFrom  rgl translate3d extrude3d shade3d rgl.triangles
 #' @importFrom geometry convhulln
 #' @author Mark ten Vregelaar
 #' @return If no zfactor is provided, method returns calculated zfactor.
@@ -207,11 +207,13 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   stp3d<-do.call(cbind,STP_coords)
 
 
+
     # take convexhull and plot STP
     conv<-t(convhulln(stp3d))
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
 
-  }
+
+    }
   # return zfactor is it was not provided
   if(is.null(zfactor)){
 return(zfac)}
@@ -239,9 +241,9 @@ axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5,expand=1.1){
   timesval<-seq(minmaxT[1],minmaxT[2],length.out = n_ticks_z)
 
 
-  rgl.bbox(xat = 0,yat = 0,zat = tickval, zlab = timesval,color = c("black", "black"), emission = "#252526",
+    rgl.bbox(xat = 0,yat = 0,zat = tickval, zlab = timesval,color = c("black", "black"), emission = "#252526",
            specular = "#636363", shininess = 5, alpha = 0.8,expand=expand,ylab = 'y)',xlab = 'x')
   axes3d(c('x--', 'x+-', 'y--', 'y+-'),nticks = n_ticks_xy)
 
 }
-
+devtools::install_github("markvregel/STPtrajectories")

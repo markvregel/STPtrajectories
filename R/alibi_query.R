@@ -202,7 +202,7 @@ calc_PIA<-function(STP1,STP2,time_interval){
   }else{
     et <- STP2_time[2]
   }
-  # remove sure time control points not in time because cannot calculate PPA for the control points
+  # make sure time control points not in time because cannot calculate PPA for the control points
   if(et == STP1@endTime[2] | et == STP2@endTime[2] ){
     et<-et-time_interval
   }
@@ -214,6 +214,7 @@ calc_PIA<-function(STP1,STP2,time_interval){
     return(list("False positive by alibi query. No meeting possible"))
   }
   times<-seq(st,et,time_interval)# times for which will be tested if intersection is possible
+
   PIAs<-c()
   t1_unknown=T
   for (i in 1:length(times)){
@@ -240,7 +241,10 @@ calc_PIA<-function(STP1,STP2,time_interval){
   }else{
     t1<-times[t1i]
     t2<- times[t1i+length(PIAs)-1]
-  PIA_polygons<-do.call(bind,PIAs)
+    if (length(PIAs)==1){
+      PIA_polygons<-PIAs[[1]]
+    }else{
+  PIA_polygons<-do.call(bind,PIAs)}
   PIA<-gConvexHull(PIA_polygons)
   # if case 1: control point in PIA, adjust t1 and t2
   if(gIntersects(STP1@sp[1,],PIA) | gIntersects(STP2@sp[1,],PIA)){

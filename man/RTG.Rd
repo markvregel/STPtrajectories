@@ -13,8 +13,9 @@ RTG(STP_track, n_points = 1, max_time_interval = NULL, quadsegs = 12,
 \item{n_points}{number of points will be added between the two points.
 If no value is provided new point(s) will be added between all consecutive space-time points}
 
-\item{max_time_interval}{The max_time_interval determines between which space-time points the random points are added.
-If the time difference between two points is bigger than max_time_interval,}
+\item{max_time_interval}{The max_time_interval(numeric) is the maximum allowed time difference in minutes between existing control points.
+If the time difference between two points is bigger than max_time_interval, new control point(S) are added in between the original control points.
+The Default is NULL, in which case between all control points n_points are added.}
 
 \item{quadsegs}{Passed to buffer. Number of line segments to use to approximate a quarter circle.
 Only used where paramter time_interval is relavant}
