@@ -89,49 +89,61 @@
 PPA <-
   function(STP_track, time = NULL, points = NULL, x_density = 250, time_interval = 1,
            quadsegs = 12) {
-    tu<-STP_track@rough_sets$time_uncertainty*60
 
+    # Time uncertainty in seconds
+    tu<-STP_track@rough_sets$time_uncertainty*60
+    # Subset STP_Track to relevant points
     if (!is.null(points)) {
       STP_track <- STP_track[points, '']
     }
+    ## PPA for specifc moment in time
     if (length(time) == 1) {
+      # If time not in time range, stop method
       if(!in_time_range_incl(time[1],c(STP_track@endTime[1]-tu,tail(STP_track@endTime,1)+tu))){
         stop('Could not calculate PPA. Time not in time range of STP_track')
       }
 
+      # Calculate PPA and return result if time is equeal to time control point and tu=0
+      # Because location uncertainty already done within calc_PPA method if time is equal to time control points
       result <-  calc_PPA(STP_track, time[1], qs = quadsegs)
-      if (time[1] %in% STP_track@endTime & isS4(result) & STP_track@rough_sets$time_uncertainty==0){
+      if (time[1] %in% STP_track@endTime & isS4(result) & tu==0){
+
         return(result)
       }}
-     else if (length(time) == 2) {
-       if(!in_time_range_incl(time[1],c(STP_track@endTime[1],tail(STP_track@endTime,1))) |
-          !in_time_range_incl(time[2],c(STP_track@endTime[1],tail(STP_track@endTime,1)))){
-         stop('Could not calculate PPA. Time not in time range of STP_track')
-       }
-
-       if (time[2]<=time[1]){
-         stop("error in time. time[2] is smaller or eaual to time[1]")
-       }
-       else if(time_interval > difftime(time[2],time[1],units = 'mins')){
-         stop("error in time. time interval is bigger than time difference between space-time points")
-
-       }else{
-         result <- calcPPA_STP_Tinterval(STP_track, time, x_density, time_interval, quadsegs)
-       }
-       }
-         else{
+    ## PPA for a time interval
+    # Check if time interval is in time range
+    else if (length(time) == 2) {
+      if(!in_time_range_incl(time[1],c(STP_track@endTime[1]-tu,tail(STP_track@endTime,1)+tu)) |
+         !in_time_range_incl(time[2],c(STP_track@endTime[1]-tu,tail(STP_track@endTime,1)+tu))){
+        stop('Could not calculate PPA. Time not in time range of STP_track')
+      }
+      # Check if time2 is bigger than time1
+      if (time[2]<=time[1]){
+        stop("error in time. time[2] is smaller or eaual to time[1]")
+      }
+      else if(time_interval > difftime(time[2],time[1],units = 'mins')){
+        stop("error in time. time interval is bigger than time difference between space-time points")
+        # claculate PPA
+      }else{
+        result <- calcPPA_STP_Tinterval(STP_track, time, x_density, time_interval, quadsegs)
+      }
+    }
+    else{
+      # If no time is provided, calculate PPA entire trajectory
       result <- calcPPA_STP_Track(STP_track, x_density)
-         }
 
+    }
+    # Show waning if no PPA was calculated
     if (!isS4(result)) {
       warning(
         'Could not calculate PPA. Maximum speed might be to low or time is equal to time of a
         space-time point in which case the PPA is a point. Returning NA'
       )
+      # If there is location uncertainty generate buffer
     } else if (STP_track@rough_sets$location_uncertainty > 0) {
       result <- gBuffer(result, width = STP_track@rough_sets$location_uncertainty)
     }
-
+    #return result
     return(result)
 
   }
@@ -299,20 +311,20 @@ calcPPA_STP <- function(STP,x_density=250){
   # calculate y coordinates. y_segment1 and y_segment2 are both half a ellipse or circle
   suppressWarnings(yCoords<-sapply(xpoints,simplify = "array", function(x0) {
     y_segment1 <- ((s*sqrt(s^4+((-2*y2^2) + 4*y1*y2 - 2*x2^2 + 4*x0*x2 - 2*y1^2 - 2*x1^2 + 4*x0*x1 - 4*x0^2)
-                   *s^2 + y2^4 - 4*y1*y2^3 + (2*x2^2 - 4*x0*x2 + 6*y1^2 + 2*x1^2 - 4*x0*x1 + 4*x0^2)
-                   *y2^2 + ((-4*y1*x2^2) + 8*x0*y1*x2 - 4*y1^3+((-4*x1^2) + 8*x0*x1 - 8*x0^2)*y1)*y2 +
-                     x2^4 - 4*x0*x2^3 + (2*y1^2 - 2*x1^2 + 4*x0*x1 + 4*x0^2)*x2^2 + ((-4*x0*y1^2) + 4*x0*x1^2 - 8*x0^2*x1)
-                   *x2 + y1^4 + (2*x1^2 - 4*x0*x1 + 4*x0^2)*y1^2 + x1^4 - 4*x0*x1^3 + 4*x0^2*x1^2)
-            + (y2+y1) *s^2 - y2^3 + y1*y2^2 + ((-x2^2) +2*x0*x2 + y1^2 + x1^2 - 2*x0*x1)*y2 + y1*x2^2 - 2*x0*y1*x2 -y1^3 + (2*x0*x1 - x1^2)*y1)/
-             (2*s^2 - 2*y2^2 + 4*y1*y2 - 2*y1^2))
+                           *s^2 + y2^4 - 4*y1*y2^3 + (2*x2^2 - 4*x0*x2 + 6*y1^2 + 2*x1^2 - 4*x0*x1 + 4*x0^2)
+                           *y2^2 + ((-4*y1*x2^2) + 8*x0*y1*x2 - 4*y1^3+((-4*x1^2) + 8*x0*x1 - 8*x0^2)*y1)*y2 +
+                             x2^4 - 4*x0*x2^3 + (2*y1^2 - 2*x1^2 + 4*x0*x1 + 4*x0^2)*x2^2 + ((-4*x0*y1^2) + 4*x0*x1^2 - 8*x0^2*x1)
+                           *x2 + y1^4 + (2*x1^2 - 4*x0*x1 + 4*x0^2)*y1^2 + x1^4 - 4*x0*x1^3 + 4*x0^2*x1^2)
+                    + (y2+y1) *s^2 - y2^3 + y1*y2^2 + ((-x2^2) +2*x0*x2 + y1^2 + x1^2 - 2*x0*x1)*y2 + y1*x2^2 - 2*x0*y1*x2 -y1^3 + (2*x0*x1 - x1^2)*y1)/
+                     (2*s^2 - 2*y2^2 + 4*y1*y2 - 2*y1^2))
 
     y_segment2 <- ((-(s*sqrt(s^4+((-2*y2^2) + 4*y1*y2 - 2*x2^2 + 4*x0*x2 - 2*y1^2 - 2*x1^2 + 4*x0*x1 - 4*x0^2)
-                     *s^2 + y2^4 - 4*y1*y2^3 + (2*x2^2 - 4*x0*x2 + 6*y1^2 + 2*x1^2 - 4*x0*x1 + 4*x0^2)
-                     *y2^2 + ((-4*y1*x2^2) + 8*x0*y1*x2 - 4*y1^3+((-4*x1^2) + 8*x0*x1 - 8*x0^2)*y1)*y2 +
-                       x2^4 - 4*x0*x2^3 + (2*y1^2 - 2*x1^2 + 4*x0*x1 + 4*x0^2)*x2^2 + ((-4*x0*y1^2) + 4*x0*x1^2 - 8*x0^2*x1)
-                     *x2 + y1^4 + (2*x1^2 - 4*x0*x1 + 4*x0^2)*y1^2 + x1^4 - 4*x0*x1^3 + 4*x0^2*x1^2)
-              +((-y2)-y1)*s^2 + y2^3 - y1*y2^2 + (x2^2 - 2*x0*x2 - y1^2 - x1^2 + 2*x0*x1)*y2 - y1*x2^2 + 2*x0*y1*x2 + y1^3 + (x1^2 - 2*x0*x1)*y1))/
-             (2*s^2 - 2*y2^2 + 4*y1*y2 - 2*y1^2))
+                             *s^2 + y2^4 - 4*y1*y2^3 + (2*x2^2 - 4*x0*x2 + 6*y1^2 + 2*x1^2 - 4*x0*x1 + 4*x0^2)
+                             *y2^2 + ((-4*y1*x2^2) + 8*x0*y1*x2 - 4*y1^3+((-4*x1^2) + 8*x0*x1 - 8*x0^2)*y1)*y2 +
+                               x2^4 - 4*x0*x2^3 + (2*y1^2 - 2*x1^2 + 4*x0*x1 + 4*x0^2)*x2^2 + ((-4*x0*y1^2) + 4*x0*x1^2 - 8*x0^2*x1)
+                             *x2 + y1^4 + (2*x1^2 - 4*x0*x1 + 4*x0^2)*y1^2 + x1^4 - 4*x0*x1^3 + 4*x0^2*x1^2)
+                      +((-y2)-y1)*s^2 + y2^3 - y1*y2^2 + (x2^2 - 2*x0*x2 - y1^2 - x1^2 + 2*x0*x1)*y2 - y1*x2^2 + 2*x0*y1*x2 + y1^3 + (x1^2 - 2*x0*x1)*y1))/
+                     (2*s^2 - 2*y2^2 + 4*y1*y2 - 2*y1^2))
 
     c(y_segment1,y_segment2)
   }))
@@ -393,17 +405,17 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     # times for which the PPA needs to be calculated
     PPAtimes<-seq(t1+(time_interval*60),t2,(time_interval*60))
 
-      # calculate PPA for times in PPAtimes
-      PPAs<-lapply(PPAtimes, function(x) {
+    # calculate PPA for times in PPAtimes
+    PPAs<-lapply(PPAtimes, function(x) {
 
-        if (!(x %in% STP_track@endTime)){
-          calc_PPA(STP_track, x,qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords
-        }
-        else{
-          NULL# <---- now NULL, alternatives may be faster
-        }})
+      if ((!x %in% STP_track@endTime) | STP_track@rough_sets$location_uncertainty>0 | STP_track@rough_sets$time_uncertainty>0){
+        calc_PPA(STP_track, x,qs = quadsegs)@polygons[[1]]@Polygons[[1]]@coords
+      }
+    })
+
     # test if a space-time point is within the time range
     TF_point <- lapply(STP_track@endTime, FUN=function(x) in_time_range(x,time_range))
+    a<<-TF_point
     if (T %in% TF_point){
       ## CASE: only one space-time point in time range
       # get times before and after original space-time point
@@ -425,6 +437,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
     else{
       ## CASE: no point in between time range
       #calculate PPA by calculating convexhull of PPAS
+      PPAs[sapply(PPAs, is.null)] <- NULL
       PPApoly <- chull_poly(PPAs,crs)
       # return final PPA
       return(PPApoly)
