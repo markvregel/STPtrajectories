@@ -211,7 +211,7 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
     # take convexhull and plot STP
     conv<-t(convhulln(stp3d))
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
-
+  #rgl.quads(stp3d[,1],stp3d[,2],stp3d[,3],col=col,alpha=alpha)
 
     }
   # return zfactor is it was not provided

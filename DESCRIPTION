@@ -9,7 +9,7 @@ Description: INCOMPLETE. Package for handling Space-Time Prism(STP) trajectories
  trajectories and to test for possible encounters by applying the alibi query.
  It also provides functions to visulize the STPs treajectories in 3D.
 Depends: trajectories
-Imports: lubridate, maptools, raster, rgeos, rgl, spacetime, plyr, rgdal
+Imports: lubridate, maptools, raster, rgeos, rgl, spacetime, plyr, rgdal, geometry
 Suggests: knitr,rmarkdown
 License: MIT
 LazyData: TRUE
