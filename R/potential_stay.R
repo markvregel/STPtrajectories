@@ -10,6 +10,8 @@
 #'  The potential_stay time interval is thus not affected by the activity_time if the sp_geom can be reached.
 #' @param STP_track A STP_Track
 #' @param spgeom A Spatialpoints,Spatiallines or Spatialpolygons object
+#' @param x_density Paramter used for calculating PPA. Default is 250 coordinates
+#' The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.
 #' @return A named list with  the potential stay time intervals for each STP that intersects with the spatial geometry
 #' @export
 #' @importFrom rgeos gIntersects gDistance
@@ -72,9 +74,9 @@
 #'
 #'shade3d(translate3d(
 #'  extrude3d(x,y,thickness = z),0,0,0),col='blue',add=TRUE)
-potential_stay <- function(STP_track, spgeom) {
+potential_stay <- function(STP_track, spgeom, x_density = 250) {
   # calculate PPA
-  PPA_track <- PPA(STP_track)
+  PPA_track <- PPA(STP_track,x_density = x_density)
   # initialise intervals to store time intervals of potential stay
   intervals <- c()
   # check if there is a potential stay time
@@ -86,7 +88,7 @@ potential_stay <- function(STP_track, spgeom) {
     # check which STPs intersect with the spgeom
     for (i in 1:length(STP_track@connections[, 1])) {
       STP <- STP_track[i:(i + 1), '']
-      PPA_STP <- PPA(STP)
+      PPA_STP <- PPA(STP,x_density = x_density)
 
       if (gIntersects(PPA_STP, spgeom)) {
         # if STP intersect with spgeom get intersection
