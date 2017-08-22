@@ -44,16 +44,17 @@
 #'
 #'# STP_track class
 #'STP_track1<-STP_Track(my_track1,v1)
+#'
 #'#--------------------------create a spatialpolygon--------------------------
-#'point_xy<-c(5,9)
 #'lake <- readWKT("POLYGON((1 8,1.3 8.5,1.7 8.7,2 9,2.5 9.2,3 9,3.5 8.5,3.2 7.7,2.5 7.5,2 7.5,1 8))")
 #'lake@proj4string<-crs_NL
 #'
 #'# calculate the potential stay time for point
 #'intervals <- potential_stay(STP_track = STP_track1,spgeom = lake)
-#'
+#'intervals
 #'# calculate the time the individual could have been at the lake
 #'lake_time <- sum(sapply(intervals, function(STP){difftime(STP[2],STP[1],units = 'mins')}))
+#'
 #'print(paste('Total time individual could have been at the lake is ',round(lake_time,2),'minutes'))
 #'
 #'# visulise in 2D
@@ -74,6 +75,7 @@
 #'
 #'shade3d(translate3d(
 #'  extrude3d(x,y,thickness = z),0,0,0),col='blue',add=TRUE)
+#'
 potential_stay <- function(STP_track, spgeom, x_density = 250) {
   # calculate PPA
   PPA_track <- PPA(STP_track,x_density = x_density)

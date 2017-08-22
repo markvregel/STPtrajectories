@@ -26,7 +26,8 @@ Either one time_uncertainty for entire track or a vector with the time_uncertain
 A class to represent Space-Time Prism(STP) trajecories.
 These are trajectories with a maximum speed for each segment.
 The maximum speed is added to the connections slot of class \link{Track}.
-The STP_Track can also combined in classes \link{Tracks} and \link{TracksColletion} of the trajecories package
+The STP_Track can also combined in classes \link{Tracks} and \link{TracksCollection} of the trajecories package.
+The STP_Track method can be used to create a STP_Track from a \link{Track} of the trajectories package.
 }
 \section{Slots of class "Track"}{
 

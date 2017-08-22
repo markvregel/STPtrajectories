@@ -1,19 +1,23 @@
 #' @title alibi_query
-#' @description CONTAINS ERRORS. PROBLEMS WITH CASE 3!!!!!
+#' @description
 #' This function tests wether there was a possible meeting between two individuals or other moving objects.
-#' If the individuals of two trajecories could have met is tested by applying the alibi query to segments that overlap in time.
+#' If the individuals of two trajecories could have met, is tested by applying the alibi query to segments that overlap in time.
 #' The alibi query is a Boolean query that checks whether two moving individuals,
 #' that are given by two samples of space-time points and speed limitations, could have met each other.
 #' The query tests if two space-time prisms intersect.
-#' Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function
+#' Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function.
+#' As a result of an error in the R implementation of the alibi query, the method occasionally returns false positives.
+#' This error is filtered out if return_PIA=TRUE.
+#'
 #' @param STP_track1 STP_track1
 #' @param STP_track2 STP_track2
 #' @param stop_if_true logigal:Stop if intersection is found. Default=TRUE
-#' @param time_interval Accuracy  in seconds of Potential Intersection Area(PIA) and time period that individuals could have been at the same location.
+#' @param return_PIA logigal:Return potential meeting time and Potential Intersection Area(PIA). Default=FALSE
+#' @param time_interval Accuracy in seconds of Potential Intersection Area(PIA) and time period that individuals could have been at the same location.
 #' Default is 5 seconds, meaning that time period and PIA are based on PPAs calculated for every 5 seconds.
-#' @return If intersection is found, method returns vector with space-time point of intersecting STPs.
-#' If PIA is True method returns Potential Intersection Area(PIA) and time
-#' If no intersection is found returns FALSE and the time period that individuals could have been at the same location.
+#' @return If an intersection is found, the method returns a vector with space-time point of intersecting STPs.
+#' If return_PIA is True, the method returns the Potential Intersection Area(PIA) and the time period that the individuals could have been at the same location.
+#' If no intersection is found, the methods returns FALSE.
 #' @author Mark ten Vregelaar
 #' @references - 	Kuijpers, B., Grimson, R., & Othman, W. (2011).
 #' An analytic solution to the alibi query in the space-time prisms model for moving object data.
@@ -55,7 +59,7 @@
 #'STP_track2<-STP_Track(my_track2,v2)
 #'
 #'## the alibi query
-#'alibi_query(STP_track1,STP_track2)
+#'alibi_query(STP_track1,STP_track2) # now only finds first intersection
 alibi_query<-function(STP_track1,STP_track2,stop_if_true=TRUE,return_PIA=FALSE,time_interval=5){
 
   # no rough_sets for alibi query

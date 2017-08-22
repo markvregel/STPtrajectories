@@ -11,7 +11,7 @@
 #'car_track<-Track(A3)# recalculate connections data
 #'head(car_track@connections)# distance in meters and speed in m/s
 #'## get maximum speed
-#'speed_ms <- getVmaxtrack(car_track)
+#'speed_ms <- getVmaxtrack(car_track)# speed in m/s
 #'# maximum speed. It is the speed required to be able to reach every point in time in km/h
 #'speed_ms*3.6
 getVmaxtrack <- function(track){

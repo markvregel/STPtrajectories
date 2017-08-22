@@ -1,17 +1,17 @@
 #visulize STPs
 # fix Cannot triangulate polygon
 #' @title STP_plot
-#' @description This function visualizes STPs in 3D.
-#' @param STP_track A STP_Track.
+#' @description This function visualizes STPs in 3D. It can be used to plot multiple \link{STP_Track}s in interactive 3D plot.
+#' @param STP_track A \link{STP_Track} .
 #' @param time_interval the time interval in minutes.Determines the amount of PPAs that are plotted.
 #' @param zfactor realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data
-#' @param color of STP(s).
+#' @param col colour of STP(s).
 #' @param st start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.
 #' @param alpha transparency of STPs. between 0 and 1
 #' @param cut_prisms In case of time uncerainty: wheter to cut the middle and
 #' normally overlapping prisms at the original time of the space-time points.
 #' Only relevant if alpha<1. default is TRUE
-#' @param quadsegs Passed to PPA Number of line segments to use to approximate a quarter circle.
+#' @param quadsegs Passed to PPA method. Number of line segments used to approximate a quarter circle.
 #' @importFrom  rgl translate3d extrude3d shade3d rgl.triangles
 #' @importFrom geometry convhulln
 #' @author Mark ten Vregelaar
@@ -21,6 +21,7 @@
 #' @examples
 #'library(spacetime)
 #'library(sp)
+#'library(rgl)
 #'## create 2 STP_tracks
 #'# time
 #'t1 <- strptime("01/01/2017 00:00:00", "%m/%d/%Y %H:%M:%S")
@@ -30,7 +31,7 @@
 #'# spatial coordinates
 #'x1=c(seq(0,25,5),seq(27.5,37.5,2.5))
 #'y1=sample(-2:2, 11,replace = TRUE)
-#'x2=c(seq(0,25,5),seq(27.5,37.5,2.5))
+#'x2=x2+7
 #'y2=sample(-2:2, 11,replace = TRUE)
 #'
 #'n = length(x1)
@@ -44,29 +45,28 @@
 #'my_track1<-Track(stidf1)
 #'my_track2<-Track(stidf2)
 #'# set maximum speed
-#'v1<-getVmaxtrack(my_track1)+0.00015
-#'v2<-getVmaxtrack(my_track2)+0.00030
+#'v1<-getVmaxtrack(my_track1)*2
+#'v2<-getVmaxtrack(my_track2)*1.5
 #'# STP_track class
 #'STP_track1<-STP_Track(my_track1,v1)
 #'STP_track2<-STP_Track(my_track2,v2)
 #'
-#'
+#'open3d()
 #'## 3D STP plot of STP_tracks
 #'z_fac<-0.2 # relative size of z scale/aspect ratio to spatial scale
 #'# plot STPS first STP_track
-#'STP_plot(STP_track1,time_interval = 1,z_fac)
+#'zf<-STP_plot(STP_track1,time_interval = 1)
 #'# plot STPS second STP_track
-#'STP_plot(STP_track2,time_interval = 1,z_fac,'blue',st = STP_track1@endTime[1])
+#'STP_plot(STP_track2,time_interval = 1,zf,'blue',st = STP_track1@endTime[1])
 #'# provide st for correct starting location first STP
 #'
 #'# calculate first and last moment in time
 #'min_max_Time<-c(STP_track1@endTime[1],STP_track2@endTime[length(STP_track2)])
 #'# add axes
-#'axes_STP_plot(min_max_Time,z_factor = z_fac)
+#'axes_STP_plot(min_max_Time,z_factor = zf)
 #'
 #'# add title and change background colour
-#'library(rgl)
-#'title3d(main = '2 randomly generated STP tracks')
+#'title3d(main = '2 STP tracks')
 #'bg3d('lightblue')
 STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
                    st=NULL,alpha=1,cut_prisms=TRUE,quadsegs=12){
@@ -221,7 +221,7 @@ return(zfac)}
 }
 
 #' @title axes_STP_plot
-#' @description This function adds a bbox with axis to a STP_plot
+#' @description This function adds a bbox with axis to a \link{STP_plot}
 #' @param minmaxT a vector of length 2 with two "POSIXct" or"POSIXt" values.
 #' The first and last moment in time of plotted tracks.
 #' Make sure first time is equal to the tracks that starts as first.
@@ -234,7 +234,38 @@ return(zfac)}
 #' @importFrom rgl rgl.bbox axes3d
 #' @author Mark ten Vregelaar
 #' @export
+#' @examples
+#'## create a STP_track of two points/ one Space-time Prism(STP)
+#'# time
+#'t1 <- as.POSIXct(strptime("01/01/2017 00:00:00", "%m/%d/%Y %H:%M:%S"))
+#'t2 <- t1+0.5*60*60 # 30 after t1
+#'time<-c(t1,t2)
+#'# spatial coordinates
+#'x=c(0,2);y=c(1,3)
 #'
+#'n = length(x)
+#'crs_NL = CRS("+init=epsg:28992")
+#'
+#'# create class STIDF
+#'stidf1 = STIDF(SpatialPoints(cbind(x,y),crs_NL), time, data.frame(co2 = rnorm(n),O2=rnorm(n)))
+#'
+#'# Track-class {trajectories}
+#'my_track1<-Track(stidf1)
+#'
+#'# set maximum speed
+#'v1<-getVmaxtrack(my_track1)+0.01
+#'# STP_track class
+#'STP1<-STP_Track(my_track1,v1)
+#'
+#'## 3D STP plot of STP
+#'open3d()
+#'z_fac<-2 # relative size of z scale/aspect ratio to spatial scale
+#'# plot STP
+#'STP_plot(STP1,time_interval = 0.5,zfactor = z_fac)
+#'
+#'
+#'# add axes
+#'axes_STP_plot(time,z_factor = z_fac)
 axes_STP_plot<-function(minmaxT,z_factor,n_ticks_xy=3,n_ticks_z=5,expand=1.1){
   tdif<-as.numeric(difftime(minmaxT[2],minmaxT[1],units = 'mins'))
   tickval<-seq(0,tdif*z_factor,length.out = n_ticks_z)

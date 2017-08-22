@@ -8,11 +8,13 @@ STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
   st = NULL, alpha = 1, cut_prisms = TRUE, quadsegs = 12)
 }
 \arguments{
-\item{STP_track}{A STP_Track.}
+\item{STP_track}{A \link{STP_Track} .}
 
 \item{time_interval}{the time interval in minutes.Determines the amount of PPAs that are plotted.}
 
 \item{zfactor}{realtive size of z axis compared to x and y axis. default=NULL: ratio axes depns on input data}
+
+\item{col}{colour of STP(s).}
 
 \item{st}{start time as "POSIXct" or"POSIXt". For plotting multiple STP_tracks use 1 starttime.}
 
@@ -22,20 +24,19 @@ STP_plot(STP_track, time_interval = 0.5, zfactor = NULL, col = "red",
 normally overlapping prisms at the original time of the space-time points.
 Only relevant if alpha<1. default is TRUE}
 
-\item{quadsegs}{Passed to PPA Number of line segments to use to approximate a quarter circle.}
-
-\item{color}{of STP(s).}
+\item{quadsegs}{Passed to PPA method. Number of line segments used to approximate a quarter circle.}
 }
 \value{
 If no zfactor is provided, method returns calculated zfactor.
 Otherwise mehtod returns NULL
 }
 \description{
-This function visualizes STPs in 3D.
+This function visualizes STPs in 3D. It can be used to plot multiple \link{STP_Track}s in interactive 3D plot.
 }
 \examples{
 library(spacetime)
 library(sp)
+library(rgl)
 ## create 2 STP_tracks
 # time
 t1 <- strptime("01/01/2017 00:00:00", "\%m/\%d/\%Y \%H:\%M:\%S")
@@ -45,7 +46,7 @@ time2<-time1+0.25*60*60
 # spatial coordinates
 x1=c(seq(0,25,5),seq(27.5,37.5,2.5))
 y1=sample(-2:2, 11,replace = TRUE)
-x2=c(seq(0,25,5),seq(27.5,37.5,2.5))
+x2=x2+7
 y2=sample(-2:2, 11,replace = TRUE)
 
 n = length(x1)
@@ -59,29 +60,28 @@ stidf2 = STIDF(SpatialPoints(cbind(x2,y2),crs_NL), time2, data.frame(co2 = rnorm
 my_track1<-Track(stidf1)
 my_track2<-Track(stidf2)
 # set maximum speed
-v1<-getVmaxtrack(my_track1)+0.00015
-v2<-getVmaxtrack(my_track2)+0.00030
+v1<-getVmaxtrack(my_track1)*2
+v2<-getVmaxtrack(my_track2)*1.5
 # STP_track class
 STP_track1<-STP_Track(my_track1,v1)
 STP_track2<-STP_Track(my_track2,v2)
 
-
+open3d()
 ## 3D STP plot of STP_tracks
 z_fac<-0.2 # relative size of z scale/aspect ratio to spatial scale
 # plot STPS first STP_track
-STP_plot(STP_track1,time_interval = 1,z_fac)
+zf<-STP_plot(STP_track1,time_interval = 1)
 # plot STPS second STP_track
-STP_plot(STP_track2,time_interval = 1,z_fac,'blue',st = STP_track1@endTime[1])
+STP_plot(STP_track2,time_interval = 1,zf,'blue',st = STP_track1@endTime[1])
 # provide st for correct starting location first STP
 
 # calculate first and last moment in time
 min_max_Time<-c(STP_track1@endTime[1],STP_track2@endTime[length(STP_track2)])
 # add axes
-axes_STP_plot(min_max_Time,z_factor = z_fac)
+axes_STP_plot(min_max_Time,z_factor = zf)
 
 # add title and change background colour
-library(rgl)
-title3d(main = '2 randomly generated STP tracks')
+title3d(main = '2 STP tracks')
 bg3d('lightblue')
 }
 \author{

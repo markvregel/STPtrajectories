@@ -6,10 +6,13 @@
 \alias{STPtrajectories-package}
 \title{STPtrajectories.}
 \description{
-Package for handling Space-Time Prism(STP) trajectories.
-It contains functions to calculate Potential Path Areas(PPAs), create random
-trajectories and to test for possible encounters by applying the alibi query.
-It also provides functions to visulize the STPs treajectories in 3D.
+Package that uses Space-Time Prism (STP) concept to analyse trajectories.
+By incorparting the STP concept, users can analyse their data while taking into account
+the uncertainty of the location of an individual in between the control points of a trajectory.
+The package also supports uncertainty about the control points themselves.
+The STPtrajectories package contains methods that calculate Potential Path Areas(PPAs), create random
+trajectories,calculate when an individual could have been at a spatial location, and test for possible encounters between two individuals by applying the alibi query.
+It also provides a method that visulises STP trajectories in 3D.
 }
 \section{Background}{
 
@@ -20,10 +23,11 @@ A space-time prism(STP) is defined as the collection of space-time locations the
 given a speed limitation. The \link{STP_Track} class can be used to handle space-time prism trajectories.
 
 The \link{alibi_query} uses this concept to test if two individuals could have met each other.
-The package provides related functions to help users in their analysis.
-of their trajectories and take into account the uncertainty about the location of an individual.
+The package provides related functions to help users in the analysis
+ of their trajectories and take into account the uncertainty about the location of an individual.
 These include methods to visualise space-time prisms(\link{STP_plot}),
-calculate the potential path area(\link{calculate_PPA}) and a random trajectory generator(\link{RTG}).
+calculate the potential path area(\link{PPA}), calculate when an individual could have been at a spatial location(\link{potential_stay})
+, and a random trajectory generator(\link{RTG})
 }
 
 \section{help}{

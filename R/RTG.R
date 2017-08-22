@@ -1,6 +1,6 @@
 #' @title RTG
 #' @description This random trajectory generator (RTG) works as described in Technitis et al.(2015).
-#' It creates a trajectory based on a the space-time prism concept,
+#' It creates a trajectory based on the space-time prism concept,
 #' it randomly adds a user defined number of points between the points of a trajectory.
 #' The new point is randomly placed in the PPA of the corresponding point in time.
 #' The added points are evenly divided over time and are always within the space-time prism.
@@ -9,17 +9,17 @@
 #' @param n_points number of points will be added between the two points.
 #' If no value is provided new point(s) will be added between all consecutive space-time points
 #' @param max_time_interval The max_time_interval(numeric) is the maximum allowed time difference in minutes between existing control points.
-#' If the time difference between two points is bigger than max_time_interval, new control point(S) are added in between the original control points.
+#' If the time difference between two points is bigger than max_time_interval, new control point(s) are added in between the original control points.
 #' The Default is NULL, in which case between all control points n_points are added.
 #' @param quadsegs Passed to buffer. Number of line segments to use to approximate a quarter circle.
 #' Only used where paramter time_interval is relavant
-#' @param iter number of times to try to place sample points in the PPA before giving up and returning NULLter (default = 4) -
-#' this may occur when trying to hit a small and awkwardly shaped polygon in a large bounding box with a small number
+#' @param iter number of times to try to place sample points in the PPA before giving up and returning NULL (default = 4).
+#' This may occur when trying to hit a small and awkwardly shaped polygon in a large bounding box with a small number
 #' of points.
 #' @importFrom spacetime STIDF
 #' @importFrom maptools spRbind
 #' @importFrom rgeos gBuffer
-#' @return a \link{STP_Track} with the newly added random space-time points. Slot data has NAs for the new points.
+#' @return A \link{STP_Track} with the newly added random space-time points. Slot data has NAs for the new points.
 #' Vmax values for new connections are equal to the vmax values of the original connections.
 #' @export
 #' @author Mark ten Vregelaar

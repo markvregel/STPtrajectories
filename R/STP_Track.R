@@ -2,7 +2,8 @@
 #' @description A class to represent Space-Time Prism(STP) trajecories.
 #' These are trajectories with a maximum speed for each segment.
 #' The maximum speed is added to the connections slot of class \link{Track}.
-#' The STP_Track can also combined in classes \link{Tracks} and \link{TracksColletion} of the trajecories package
+#' The STP_Track can also combined in classes \link{Tracks} and \link{TracksCollection} of the trajecories package.
+#' The STP_Track method can be used to create a STP_Track from a \link{Track} of the trajectories package.
 #' @param Track  Object of class  \link{Track}
 #' @param vmax  The maxium speed of the individual. Must be large enough to reach the next point.
 #' Either one vmax for entire track or a vector with the max speed for each segment.

@@ -2,10 +2,10 @@
 ## check correctness for acitivty time and roughsets and combinations
 #' @title PPA
 #' @description Function for calculating the Potetial Path Area(PPA) of a STP_track.
-#' This function can calculate the PPA for the entire trajectory, a specfic moment in time or a time range.
-#' The PPA for a specific moment in time is always based on the two points that before and after paramter time.
-#' If time is outside time range of track but within time uncerainty limits,
-#' method will return PPA based on the two closest points in time.
+#' This function can calculate the PPA for the entire trajectory, a specfic moment in time, or a time range.
+#' The PPA for a specific moment in time is always based on the two points that before and after the time parameter.
+#' If time is outside time range of the \link{STP_Track} but within time uncertainty limits,
+#' the method will return the PPA based on the two closest points in time.
 #' @param STP_track The STP_track for which the PPA needs to be calculated
 #' @param time Time("POSIXct" or"POSIXt") for which the PPA needs to be calculated.
 #' Use time = c(time1,time2) to calculate PPA for a time range. Default is NULL: calculate PPA for entire STP_track
