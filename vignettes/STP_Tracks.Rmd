@@ -22,11 +22,12 @@ vignette: >
 This vignette is meant to show an example of what is possible with the STPtrajectories package. In this vignette two STP_Tracks are created and Analysed. Altough the tracks are randomly generated, they are meant to reperesent two bears. 
 The following steps will be implemeted:
 
-* Create two pairs of space-time points using the STP_Track class. 
+* Create two pairs of space-time prism trajectories using the STP_Track class. 
 * Add more points by applying the random trajectory generator(RTG)
-* Calculate the PPA area for both tracks
+* Calculate the PPA(Potential Path Area) for both tracks
 * Apply the alibi query
 * Visulise the STPtrajectories
+* Calculate when the bears could have been at a road
 
 
 Most functions avaliable in the package will be used in this example.
@@ -48,7 +49,7 @@ library(STPtrajectories)
 
 
 First Load the required packages
-```{r setup}
+```{r setup,results="hide",warning=FALSE,message=FALSE}
 library(sp)
 library(spacetime)
 library(knitr)
@@ -112,7 +113,7 @@ legend('topright',c('Bear 1','Bear 2'),pch = 16,lty =1, col=c('red','blue'))
 ```
 
 ## Calculate the Potential Path Area 
-The time difference between the space-time points is now a bit over 11 minutes and thus are the maximum speeds of 5 and 6 km/h not realsitic. A more realstic max speed is 1.5 times the speed required to reach every point.
+The time difference between the space-time points is now a bit over 11 minutes and thus are the maximum speeds of 5 and 6 km/h not realsitic. A more realstic maxium speed is 1.5 times the speed required to reach every point.
 ```{r}
 # set the new maximum speed. Same for every segment
 vmax_bear1<-getVmaxtrack(STP_track_bear1)*1.5
@@ -136,17 +137,19 @@ plot(PPA_bear1,add=T)
 plot(PPA_bear2,add=T)
 
 ```
-## the alibi query
 
-The figure above shows a spatial intersetion between the trajectories. To test wether they could have been at the same location at the same time you can apply the alibi query.
+## The alibi query
+The figure above shows a spatial intersection between the trajectories. To test wether they could have been at the same location at the same time you can apply the alibi query. The method will return the control points of the prisms that intersect. If return_PIA is TRUE, the method will return alsothe possible meeeting time and Potential Intersection Area(PIA) of the intersection.
+
 ```{r alibi_query}
-alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = F,return_PIA = T)# not always correct. package still in development
+alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = F,return_PIA = T)
 
 ```
-## Visulise STP_tracks
-```{r STP_plot, webgl=TRUE}
+## Visualise STP_tracks
+Prisms 6 and 6 intersect. To see how the prisms intersect, the STP_plot method can be used.
+```{r STP_plot, webgl=TRUE, results="hide",warning=FALSE}
 zfac<- 50 # aspect ration between sptatial axes and time axis
-t_int <- 0.8 # determines how many PPAs are used to visualise STPs.
+t_int <- 0.5 # determines how many PPAs are used to visualise STPs.
 open3d()
 STP_plot(STP_track_bear1,time_interval = t_int,zfactor = zfac)
 STP_plot(STP_track_bear2,time_interval = t_int,zfactor = zfac,st = STP_track_bear1@endTime[1],col = 'blue')
@@ -166,10 +169,10 @@ box3d()
 ```
 
 ## potential stay time
-Somone saw a bear on a road somewhere between 12 and 1 o'clock. The code below shows how you can 
+Someone saw a bear on a road somewhere between 12 and 1 o'clock. The code below shows how you can 
 check if bear 1 was that bear and when he could have been at the road
 
-```{r, webgl=TRUE}
+```{r potentialstay,warning=FALSE}
 bear1_sub <-STP_track_bear1[1:20,'2017-01-01 12:00:00 CET::2017-01-01 13:00:00 CET']
 
 road<-readWKT("LINESTRING(2800 500,3200 200,4000 50,5000 100,6000 500,7000 1000,7700 1200)")
@@ -185,28 +188,27 @@ road_time <- sum(sapply(intervals, function(int){difftime(int[2],int[1],units = 
 
 print(paste('Total time bear 1 could have been on the road is ',round(road_time,2),'minutes'))
 
+```
+Visualise road and space-tim prisms in 3D.
+```{r road, webgl=TRUE, results="hide",warning=FALSE}
 
-# visulise in 3D
 open3d()
-zfac<-STP_plot(bear1_sub,time_interval = 0.6)
-
+# Plot prisms
+zfac<-STP_plot(bear1_sub,time_interval = 0.5)
+# Add axes
 axes_STP_plot(c(bear1_sub@endTime[1],tail(bear1_sub@endTime,1)),z_factor = zfac,n_ticks_z = 5,n_ticks_xy = 4)
-
-
+# Create road polygon and add to plot
 x<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,1]
 y<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,2]
 z<-difftime(tail(bear1_sub@endTime,1),bear1_sub@endTime[1],units = 'mins')*zfac
-
-
-shade3d(translate3d(
-  extrude3d(x,y,thickness = z),0,0,0),col='black',add=TRUE)
+shade3d(translate3d(extrude3d(x,y,thickness = z),0,0,0),col='black',add=TRUE)
 
 
 ```
 
 
-# creating rough space-time prisms
-```{r, webgl=TRUE}
+# Creating rough space-time prisms
+```{r, webgl=TRUE, results="hide",warning=FALSE}
 # higher maximum speed 
 vmax<- bear1_sub@connections$vmax[1]*1.6
 # taking into account uncerainty about location and measurement time at control points.
@@ -217,9 +219,9 @@ STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
 axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
 
 ```
-# creating prisms with activity time
+# Creating prisms with activity time
 
-```{r, webgl=TRUE}
+```{r, webgl=TRUE, results="hide",warning=FALSE}
 bear1_activity<-STP_Track(bear1_sub,vmax,activity_time = 3)
 open3d()
 zf<-STP_plot(bear1_activity,col='darkcyan')

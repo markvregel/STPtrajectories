@@ -1,7 +1,7 @@
 ## ----include=FALSE-------------------------------------------------------
 library(STPtrajectories)
 
-## ----setup---------------------------------------------------------------
+## ----setup,results="hide",warning=FALSE,message=FALSE--------------------
 library(sp)
 library(spacetime)
 library(knitr)
@@ -82,12 +82,12 @@ plot(PPA_bear2,add=T)
 
 
 ## ----alibi_query---------------------------------------------------------
-alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = F,return_PIA = T)# not always correct. package still in development
+alibi_query(STP_track_bear1,STP_track_bear2,stop_if_true = F,return_PIA = T)
 
 
-## ----STP_plot, webgl=TRUE------------------------------------------------
+## ----STP_plot, webgl=TRUE, results="hide",warning=FALSE------------------
 zfac<- 50 # aspect ration between sptatial axes and time axis
-t_int <- 0.8 # determines how many PPAs are used to visualise STPs.
+t_int <- 0.5 # determines how many PPAs are used to visualise STPs.
 open3d()
 STP_plot(STP_track_bear1,time_interval = t_int,zfactor = zfac)
 STP_plot(STP_track_bear2,time_interval = t_int,zfactor = zfac,st = STP_track_bear1@endTime[1],col = 'blue')
@@ -105,7 +105,7 @@ axes3d(c('x','y'),xlab='x')
 axis3d('z',at=tickval,labels = timesval,cex=0.8)
 box3d()
 
-## ---- webgl=TRUE---------------------------------------------------------
+## ----potentialstay,warning=FALSE-----------------------------------------
 bear1_sub <-STP_track_bear1[1:20,'2017-01-01 12:00:00 CET::2017-01-01 13:00:00 CET']
 
 road<-readWKT("LINESTRING(2800 500,3200 200,4000 50,5000 100,6000 500,7000 1000,7700 1200)")
@@ -122,24 +122,22 @@ road_time <- sum(sapply(intervals, function(int){difftime(int[2],int[1],units = 
 print(paste('Total time bear 1 could have been on the road is ',round(road_time,2),'minutes'))
 
 
-# visulise in 3D
+## ----road, webgl=TRUE, results="hide",warning=FALSE----------------------
+
 open3d()
-zfac<-STP_plot(bear1_sub,time_interval = 0.6)
-
+# Plot prisms
+zfac<-STP_plot(bear1_sub,time_interval = 0.5)
+# Add axes
 axes_STP_plot(c(bear1_sub@endTime[1],tail(bear1_sub@endTime,1)),z_factor = zfac,n_ticks_z = 5,n_ticks_xy = 4)
-
-
+# Create road polygon and add to plot
 x<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,1]
 y<-road_buffer@polygons[[1]]@Polygons[[1]]@coords[,2]
 z<-difftime(tail(bear1_sub@endTime,1),bear1_sub@endTime[1],units = 'mins')*zfac
-
-
-shade3d(translate3d(
-  extrude3d(x,y,thickness = z),0,0,0),col='black',add=TRUE)
+shade3d(translate3d(extrude3d(x,y,thickness = z),0,0,0),col='black',add=TRUE)
 
 
 
-## ---- webgl=TRUE---------------------------------------------------------
+## ---- webgl=TRUE, results="hide",warning=FALSE---------------------------
 # higher maximum speed 
 vmax<- bear1_sub@connections$vmax[1]*1.6
 # taking into account uncerainty about location and measurement time at control points.
@@ -150,7 +148,7 @@ STP_plot(bear1_sub,col='green',zfactor = zf,st=bear1_sub_rough@endTime[1]-1*60)
 axes_STP_plot(c(bear1_sub_rough@endTime[1]-1*60,bear1_sub_rough@endTime[6]+1*60),z_factor = zf)
 
 
-## ---- webgl=TRUE---------------------------------------------------------
+## ---- webgl=TRUE, results="hide",warning=FALSE---------------------------
 bear1_activity<-STP_Track(bear1_sub,vmax,activity_time = 3)
 open3d()
 zf<-STP_plot(bear1_activity,col='darkcyan')

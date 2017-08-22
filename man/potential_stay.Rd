@@ -4,12 +4,15 @@
 \alias{potential_stay}
 \title{potential_stay}
 \usage{
-potential_stay(STP_track, spgeom)
+potential_stay(STP_track, spgeom, x_density = 250)
 }
 \arguments{
 \item{STP_track}{A STP_Track}
 
 \item{spgeom}{A Spatialpoints,Spatiallines or Spatialpolygons object}
+
+\item{x_density}{Paramter used for calculating PPA. Default is 250 coordinates
+The amount of x coordinates for which the corresponding y coordinate(s) will be calculated.}
 }
 \value{
 A named list with  the potential stay time intervals for each STP that intersects with the spatial geometry
