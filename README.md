@@ -5,7 +5,7 @@ Overview
 Package that uses Space-Time Prism (STP) concept to analyse trajectories.
 By incorparting the STP concept, users can analyse their data while taking into account 
 the uncertainty of the location of an individual in between the control points of a trajectory.
-The package also supports uncertainty about the control points themselves.  
+The package also supports uncertainty about the control points themselves; rough sets for both the spatial and temporal measurements.
 The STPtrajectories package contains methods that calculate Potential Path Areas(PPAs),
 create random  trajectories, calculate when an individual could have been at a spatial location, and test for possible encounters between two individuals by applying the alibi query.
 It also provides a method that visulises STP trajectories in 3D.
@@ -19,7 +19,7 @@ Installation
 # the the development version from GitHub:
 # install.packages("devtools")
 devtools::install_github("markvregel/STPtrajectories",build_vignettes=TRUE)
-# or without vignettes. vignette is rather large
+# or without vignettes. The Vignette is rather large.
 devtools::install_github("markvregel/STPtrajectories")
 ```
 
