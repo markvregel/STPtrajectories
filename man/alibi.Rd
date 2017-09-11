@@ -2,8 +2,11 @@
 % Please edit documentation in R/alibi_functions.R
 \name{alibi}
 \alias{alibi}
+\alias{alibi}
 \title{alibi}
 \usage{
+alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)
+
 alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)
 }
 \arguments{
@@ -34,11 +37,46 @@ alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4, v2)
 \item{y4}{y4}
 
 \item{v2}{v2}
+
+\item{t1}{t1}
+
+\item{x1}{x1}
+
+\item{y1}{y1}
+
+\item{t2}{t2}
+
+\item{x2}{x2}
+
+\item{y2}{y2}
+
+\item{v1}{v1}
+
+\item{t3}{t3}
+
+\item{x3}{x4}
+
+\item{y3}{y3}
+
+\item{t4}{t4}
+
+\item{x4}{x4}
+
+\item{y4}{y4}
+
+\item{v2}{v2}
 }
 \value{
+True or False for the alibi query
+
 True or False for the alibi query
 }
 \description{
 alibi query
+
+alibi query
+}
+\author{
+Sytze de Bruin and Mark ten Vregelaar
 }
 \keyword{internal}

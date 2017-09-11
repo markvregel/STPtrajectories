@@ -31,8 +31,6 @@ The alibi query is a Boolean query that checks whether two moving individuals,
 that are given by two samples of space-time points and speed limitations, could have met each other.
 The query tests if two space-time prisms intersect.
 Kuijpers et al. (2011) provide the analytical solution for the alibi query that is used by this function.
-As a result of an error in the R implementation of the alibi query, the method occasionally returns false positives.
-This error is filtered out if return_PIA=TRUE.
 }
 \examples{
 library(spacetime)
