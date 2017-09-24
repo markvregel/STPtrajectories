@@ -64,6 +64,11 @@ alibi_query<-function(STP_track1,STP_track2,stop_if_true=TRUE,return_PIA=FALSE,t
   STP_track1<-zero_rough_sets(STP_track1)
   STP_track2<-zero_rough_sets(STP_track2)
 
+  # if PPAs trajectories don't intersect return FALSE
+  if (!gIntersects(PPA(STP_track1),PPA(STP_track2))){
+    return(FALSE)
+  }
+
   Switch<-F
 # determine 1st and 2nd STP_track to improve processing time
 if (length(STP_track1)!=length(STP_track2)){
@@ -109,7 +114,6 @@ for (i in 1:(length(track1)-1)){
           }else{
             STPs<-c(i,j)
           }
-          #message(c(TRUE, paste(': possibe intersection for STPs/connections ',STPs[1],'and',STPs[2])))
           points<-list('a'=STPs[1]:(STPs[1]+1),
             'b'=STPs[2]:(STPs[2]+1))
 
@@ -166,14 +170,8 @@ alibi_STP <- function(STP1,STP2){
   result<-alibi(t1, x1, y1, t2, x2, y2, v1, t3, x3, y3, t4, x4, y4,v2)
   query_result<-FALSE
   if(is.numeric(result)){
-    #message(paste0("Case ",result))
-    if(result==3){
-      if(gIntersects(PPA(STP1),PPA(STP2))){
         query_result<-TRUE
-      }else{
-      }}else{
-        query_result<-TRUE
-      }}
+      }
 
 
 
