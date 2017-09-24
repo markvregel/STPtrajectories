@@ -207,7 +207,6 @@ STP_plot<-function(STP_track,time_interval=0.5,zfactor=NULL,col='red',
   stp3d<-do.call(cbind,STP_coords)
 
 
-
     # take convexhull and plot STP
     conv<-t(convhulln(stp3d))
     rgl.triangles(stp3d[conv,1],stp3d[conv,2],stp3d[conv,3],col=col,alpha=alpha)
