@@ -261,4 +261,3 @@ zero_rough_sets<-function(STP_track1){
   STP_track1@rough_sets$time_uncertainty<-0
   return(STP_track1)
 }
-
