@@ -308,6 +308,7 @@ calcPPA_STP <- function(STP,x_density=250){
     xrange<-c(x2-dist,x1+dist)
   }
   xpoints<-seq(xrange[1],xrange[2],length=x_density)
+
   # calculate y coordinates. y_segment1 and y_segment2 are both half a ellipse or circle
   suppressWarnings(yCoords<-sapply(xpoints,simplify = "array", function(x0) {
     y_segment1 <- ((s*sqrt(s^4+((-2*y2^2) + 4*y1*y2 - 2*x2^2 + 4*x0*x2 - 2*y1^2 - 2*x1^2 + 4*x0*x1 - 4*x0^2)
@@ -415,7 +416,7 @@ calcPPA_STP_Tinterval <- function(STP_track,time_range,x_density,time_interval, 
 
     # test if a space-time point is within the time range
     TF_point <- lapply(STP_track@endTime, FUN=function(x) in_time_range(x,time_range))
-    a<<-TF_point
+
     if (T %in% TF_point){
       ## CASE: only one space-time point in time range
       # get times before and after original space-time point
