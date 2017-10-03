@@ -12,8 +12,8 @@ Description: Package that uses Space-Time Prism (STP) concept to analyse traject
  create random  trajectories, calculate when an individual could have been at a spatial location, and test for possible encounters between two individuals by applying the alibi query.
  It also provides a method that visulises STP trajectories in 3D.
 Depends: trajectories
-Imports: lubridate, maptools, raster, rgeos, rgl, spacetime, plyr, rgdal, geometry
-Suggests: knitr,rmarkdown
+Imports: lubridate, maptools, raster, rgeos, rgl, spacetime, plyr, rgdal, geometry, polynom
+Suggests: knitr,rmarkdown, spacetime, sp
 License: MIT
 LazyData: TRUE
 RoxygenNote: 6.0.1
