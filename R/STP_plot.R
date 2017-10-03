@@ -31,7 +31,7 @@
 #'# spatial coordinates
 #'x1=c(seq(0,25,5),seq(27.5,37.5,2.5))
 #'y1=sample(-2:2, 11,replace = TRUE)
-#'x2=x2+7
+#'x2=x1+7
 #'y2=sample(-2:2, 11,replace = TRUE)
 #'
 #'n = length(x1)
