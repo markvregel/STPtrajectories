@@ -3,7 +3,6 @@ Type: Package
 Title: Space-time prism trajectories
 Version: 0.2.0
 Author: Mark ten Vregelaar
-Maintainer: Mark ten Vregelaar <m.vregelaar@gmail.com>
 Description: Package that uses Space-Time Prism (STP) concept to analyse trajectories.
  By incorparting the STP concept, users can analyse their data while taking into account 
  the uncertainty of the location of an individual in between the control points of a trajectory.
